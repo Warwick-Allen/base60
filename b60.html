@@ -1,0 +1,123 @@
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <title>b60</title>
+  <style type="text/css">
+    div.b60 {
+      display:        inline-block;
+      font-size:      0.12em;
+      margin:         -0.2em -0.6em -1em -0.6em;
+      overflow:       visible;
+      text-align:     center;
+      vertical-align: middle;
+    }
+    div.b60>div {
+      display:        inline-block;
+      font-size:      2.5em;
+      height:         2.4em;
+      margin:         0.2em;
+      overflow:       visible;
+      padding-top:    0.05em;
+      width:          2.5em;
+      vertical-align: middle;
+    }
+    div.b60>div>div {
+      display:        inline-block;
+      border-style:   none;
+      border-width:   0.04em;
+      box-sizing:     border-box;
+      height:         1.1em;
+      margin:         0;
+      padding:        0;
+      width:          1.1em;
+    }
+    div.b60>div    >div:nth-child(1) { margin:             0      -0.01em -0.01em  0     ;
+                                       border-radius:      0.5em   0.1em   0       0.5em ;
+                                       border-right-style: solid                         ; }
+    div.b60>div    >div:nth-child(2) { margin:             0       0      -0.01em -0.01em;
+                                       border-radius:      0.1em   0.5em   0.5em   0     ;
+                                       border-left-style:  solid                         ; }
+    div.b60>div    >div:nth-child(4) { margin:            -0.01em  0       0      -0.01em;
+                                       border-radius:      0       0.5em   0.5em   0.1em ;
+                                       border-left-style:  solid                         ; }
+    div.b60>div    >div:nth-child(3) { margin:            -0.01em -0.01em  0       0     ;
+                                       border-radius:      0.5em   0       0.1em   0.5em ;
+                                       border-right-style: solid                         ; }
+    div.b60>div._01>div:nth-child(1) { border-top-style:    solid; }
+    div.b60>div._02>div:nth-child(1) { border-style:        solid; }
+    div.b60>div._11>div:nth-child(2) { border-top-style:    solid; }
+    div.b60>div._12>div:nth-child(2) { border-style:        solid; }
+    div.b60>div._21>div:nth-child(4) { border-bottom-style: solid; }
+    div.b60>div._22>div:nth-child(4) { border-style:        solid; }
+    div.b60>div._31>div:nth-child(3) { border-bottom-style: solid; }
+    div.b60>div._32>div:nth-child(3) { border-style:        solid; }
+    .b60 span.name { font-size: 50%; }
+    table.b60 td {
+      border:         0.01em solid #eeeeee;
+      padding:        0 0.2em;
+      text-align:     right;
+      font-size:      2em;
+    }
+  </style>
+  <script type="text/javascript">
+    var name_parts = [
+      [ ''  , 'ta', 'ru'],
+      [ ''  , 'si', 'go'],
+      [ ''  , 'll', 'tt'],
+      [ 'un', 'et', 'ok']
+    ];
+    function base3(n) {
+      var r = n % 3;
+      return n == r ? n.toString() : base3((n - r) / 3) + r;
+    }
+    function base81char(n_10) {
+      var n_3 = base3(n_10).padStart(4, '0').split('');
+      var b = 3;
+      var html = '<div class="b60"><div class="' +
+        n_3.map(c => '_' + b-- + c).join(' ') +
+        '"><div></div><div></div><div></div><div></div></div></div>';
+      var name = n_3.reduce((name, _) => {return name + name_parts[++b][_]}, '');
+      name = name.replace(/^([lt])\1/, '$1');
+      name = name.replace(/([ou])\1/, '$1h$1');
+      return {'html': html, 'name': name};
+    }
+    function base60(n) {
+      var r = n % 60;
+      var b81c = base81char(r);
+      if (n == r) return b81c;
+      var b60 = base60((n - r)/60);
+      b60.html += b81c.html;
+      b60.name += '-' + b81c.name;
+      return b60;
+    }
+    function showBase60(n = 60**2, i0 = 0, m = 12) {
+      document.write('<table class="b60"><tbody>');
+      var row = '';
+      for (var i = i0; i < n; i++) {
+        var r = i % m;
+        if (r == 0) row += '<tr>';
+        var b60 = base60(i);
+        row += '<td>' + b60.html + '<br/>' +
+               '<span class="name">' + b60.name + '</span><br/>' +
+               i + '</td>';
+        if (r == m - 1) {
+          row += '</tr>';
+          document.write(row + "\n");
+          row = '';
+        }
+      }
+      document.write('</tbody></table>' + "\n");
+    }
+  </script>
+</head>
+
+<body>
+  <script type="text/javascript">
+    //Array.from({length: 81}, (_, i) => i).forEach(i => document.write(base81char(i)));
+    //var a = 0;
+    //Array.from({length: 4}, (_, i) => i).forEach(i => a += i*60**i);
+    showBase60(6666, 0, 6);
+  </script>
+</body>
+</html>
