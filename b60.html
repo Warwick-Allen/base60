@@ -3,6 +3,9 @@
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
   <title>Et-Un Base 60</title>
   <style type="text/css">
+    body {
+      font-size:      24em;
+    }
     div.b60 {
       display:        inline-block;
       font-size:      0.3em;
@@ -18,31 +21,31 @@
     div.b60>div>div {
       display:        inline-block;
       border-style:   none;
+      border-radius:  0.5em;
       border-width:   0.25em;
       box-sizing:     border-box;
       height:         1em;
       position:       absolute;
       width:          1em;
     }
-    div.b60>div>div:nth-child(1) { margin:             0        0       0      -1.75em  ;
-                                   border-radius:      0.5em    0.5em   0      0.5em    ; }
-    div.b60>div>div:nth-child(2) { margin:             0        0       0      -1em     ;
-                                   border-radius:      0.5em    0.5em   0.5em   0       ; }
-    div.b60>div>div:nth-child(3) { margin:             0.75em   0       0      -1em     ;
-                                   border-radius:      0        0.5em   0.5em   0.5em   ; }
-    div.b60>div>div:nth-child(4) { margin:             0.75em   0       0      -1.75em  ;
-                                   border-radius:      0.5em    0       0.5em   0.5em   ; }
-    div.b60>div>div:nth-child(3) { border-top-style: solid; }
-    div.b60>div>div:nth-child(4) { border-top-style: solid; }
-    div.b60>div._01>div:nth-child(1) { border-style: solid solid none  none ; }
-    div.b60>div._02>div:nth-child(1) { border-style: solid                  ; }
-    div.b60>div._11>div:nth-child(2) { border-style: solid none  none  solid; }
-    div.b60>div._12>div:nth-child(2) { border-style: solid                  ; }
-    div.b60>div._21>div:nth-child(3) { border-style: solid none  solid solid; }
-    div.b60>div._22>div:nth-child(3) { border-style: solid                  ; }
-    div.b60>div._31>div:nth-child(4) { border-style: solid solid solid none ; }
-    div.b60>div._32>div:nth-child(4) { border-style: solid                  ; }
+    div.b60>div>div:nth-child(1) { margin: 0        0 0 -1.75em; border-bottom-right-radius: 0 }
+    div.b60>div>div:nth-child(2) { margin: 0        0 0 -1em   ; border-bottom-left-radius:  0 }
+    div.b60>div>div:nth-child(3) { margin: 0.75em   0 0 -1em   ; border-top-left-radius:     0 }
+    div.b60>div>div:nth-child(4) { margin: 0.75em   0 0 -1.75em; border-top-right-radius:    0 }
+    div.b60>div>div:nth-child(4) { border-right-style: solid }
+    div.b60>div._01>div:nth-child(1) { border-style: none  none  solid solid }
+    div.b60>div._02>div:nth-child(1) { border-style: solid solid none  none  }
+    div.b60>div._11>div:nth-child(2) { border-style: none  solid solid none  }
+    div.b60>div._12>div:nth-child(2) { border-style: solid none  none  solid }
+    div.b60>div._21>div:nth-child(3) { border-style: solid solid none  none  }
+    div.b60>div._22>div:nth-child(3) { border-style: solid }
+    div.b60>div._31>div:nth-child(4) { border-style:   solid }
+    div.b60>div._32>div:nth-child(4) { border-style: solid }
     .b60 span.name { font-size: 60%; }
+    div.equation {
+      display: block;
+      white-space: nowrap;
+    }
     table.b60 {
       display:        inline-block;
       text-align:     right;
@@ -115,16 +118,19 @@
   <h1><em>Et-Un</em> Base 60</h1>
   <div style="text-align: right;">
     <script type="text/javascript">
-      document.write('<p>'+base60(744).html+'/'+base60(12).html+'='+base60(62).html+'</p>');
+      document.write('<div class="equation">'+base60(744).html+'/'+base60(12).html+'='+base60( 62).html+'</div>');
+      document.write('<div class="equation"><span style="font-size:80%">744/12= 62</span></div>');
+      document.write('<div class="equation">'+base60(888).html+'+'+base60(72).html+'='+base60(960).html+'</div>');
+      document.write('<div class="equation"><span style="font-size:80%">888+72=960</span></div>');
       showBase60(3 + 9,         0,            1);
-      showBase60(3 + 98,        98-60,        1);
-      showBase60(3 + 987,       987-60,       1);
-      showBase60(3 + 9876,      9876-60,      1);
-      showBase60(3 + 98765,     98765-60,     1);
-      showBase60(3 + 987654,    987654-60,    1);
-      showBase60(3 + 9876543,   9876543-60,   1);
-      showBase60(3 + 98765432,  98765432-60,  1);
-      showBase60(3 + 987654321, 987654321-60, 1);
+      showBase60(3 + 98,        98       -86, 1);
+      showBase60(3 + 987,       987      -86, 1);
+      showBase60(3 + 9876,      9876     -86, 1);
+      showBase60(3 + 98765,     98765    -86, 1);
+      showBase60(3 + 987654,    987654   -86, 1);
+      showBase60(3 + 9876543,   9876543  -86, 1);
+      showBase60(3 + 98765432,  98765432 -86, 1);
+      showBase60(3 + 987654321, 987654321-86, 1);
     </script>
   </div>
 </body>
