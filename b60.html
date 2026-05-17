@@ -84,7 +84,7 @@
       }
       var b = _base60(n);
       var log60 = (b.name.match(/-/g) || []).length + 1;
-      if (log60 > 1) b.name = 'ja' + _base60(log60).name + '-' + b.name;
+      if (log60 > 1) b.name = 'ja' + _base60(log60).name + 'ji-' + b.name;
       return b;
     }
     function showBase60(n = 60**2, i0 = 0, m = 12) {
@@ -112,6 +112,7 @@
   <h1><em>Et-Un</em> Base 60</h1>
   <script type="text/javascript">
     document.write('<p>'+base60(744).html+'/'+base60(12).html+'='+base60(62).html+'</p>');
+    showBase60(72, 0, 6);
     showBase60(9876543, 9876543-3600, 3);
   </script>
 </body>
