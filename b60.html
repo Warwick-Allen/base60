@@ -73,13 +73,19 @@
       return {'html': html, 'name': name};
     }
     function base60(n) {
-      var r = n % 60;
-      var b81c = base60char(r);
-      if (n == r) return b81c;
-      var b60 = base60((n - r)/60);
-      b60.html += b81c.html;
-      b60.name += '-' + b81c.name;
-      return b60;
+      function _base60(n) {
+        var r = n % 60;
+        var b81c = base60char(r);
+        if (n == r) return b81c;
+        var b60 = _base60((n - r)/60);
+        b60.html += b81c.html;
+        b60.name += '-' + b81c.name;
+        return b60;
+      }
+      var b = _base60(n);
+      var log60 = (b.name.match(/-/g) || []).length + 1;
+      if (log60 > 1) b.name = 'ja' + _base60(log60).name + '-' + b.name;
+      return b;
     }
     function showBase60(n = 60**2, i0 = 0, m = 12) {
       document.write('<table class="b60"><tbody>');
@@ -106,7 +112,7 @@
   <h1><em>Et-Un</em> Base 60</h1>
   <script type="text/javascript">
     document.write('<p>'+base60(744).html+'/'+base60(12).html+'='+base60(62).html+'</p>');
-    showBase60(5678);
+    showBase60(9876543, 9876543-3600, 3);
   </script>
 </body>
 </html>
