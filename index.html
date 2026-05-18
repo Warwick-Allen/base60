@@ -89,6 +89,7 @@
         replace(/o/g, 'ɒ').
         replace(/u/g, 'ɔ').
         replace(/ta/g, 'tʌ.').
+        replace(/\.(.\.)/g, '$1').
         replace(/-/g, '|')
       ;
       return {
