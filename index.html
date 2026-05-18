@@ -1,7 +1,7 @@
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-  <title>Et-Un Base 60</title>
+  <title>Jī Base 60</title>
   <style type="text/css">
     body {
       font-size:      24em;
@@ -39,9 +39,10 @@
     div.b60>div._12>div:nth-child(2) { border-style: solid none  none  solid }
     div.b60>div._21>div:nth-child(3) { border-style: solid solid none  none  }
     div.b60>div._22>div:nth-child(3) { border-style: solid }
-    div.b60>div._31>div:nth-child(4) { border-style:   solid }
+    div.b60>div._31>div:nth-child(4) { border-style: solid }
     div.b60>div._32>div:nth-child(4) { border-style: solid }
-    .b60 span.name { font-size: 60%; }
+    .b60 span.ipa  { font-size: 40%; font-family: sans-serif }
+    .b60 span.name { font-size: 60%; font-family:      serif }
     div.equation {
       display: block;
       white-space: nowrap;
@@ -67,6 +68,10 @@
       var r = n % 3;
       return n == r ? n.toString() : base3((n - r) / 3) + r;
     }
+    String.prototype.replaceWithCharCode = function (a, b) {
+      var re = new RegExp(a, 'g');
+      return this.replace(re, String.fromCharCode(b));
+    };
     function base60char(n_10) {
       var n_3 = base3(n_10).padStart(4, '0').split('');
       var b = 3;
@@ -76,7 +81,21 @@
       var name = n_3.reduce((name, _) => {return name + name_parts[++b][_]}, '');
       name = name.replace(/^([lt])\1/, '$1');
       name = name.replace(/([ou])\1/, '$1h$1');
-      return {'html': html, 'name': name};
+      var ipa = name.
+        replace(/(.)\1/g, '$1.').
+        replace(/\.'/g, "'").
+        replace(/h/g, '.h').
+        replace(/i/g, 'ɪ').
+        replace(/o/g, 'ɒ').
+        replace(/u/g, 'ɔ').
+        replace(/ta/g, 'tʌ.').
+        replace(/-/g, '|')
+      ;
+      return {
+        'html': html,
+        'ipa' : ipa,
+        'name': name
+      };
     }
     function base60(n) {
       function _base60(n) {
@@ -86,11 +105,17 @@
         var b60 = _base60((n - r)/60);
         b60.html += b81c.html;
         b60.name += '-' + b81c.name;
+        b60.ipa  += '.' + b81c.ipa;
         return b60;
       }
       var b = _base60(n);
       var log60 = (b.name.match(/-/g) || []).length + 1;
-      if (log60 > 1) b.name = _base60(log60).name + 'ji-' + b.name;
+      if (log60 > 1) {
+        var b_log60 = _base60(log60);
+        b.name = b_log60.name + 'jī-' + b.name;
+        b.ipa  = b_log60.ipa + "'dʒiː." + b.ipa;
+      }
+      b.ipa = '/' + b.ipa + '/';
       return b;
     }
     function showBase60(n = 60**2, i0 = 0, m = 12) {
@@ -102,6 +127,7 @@
         var b60 = base60(i);
         row += '<td>' + b60.html + '<br/>' +
                '<span class="name">' + b60.name + '</span><br/>' +
+               '<span class="ipa" >' + b60.ipa  + '</span><br/>' +
                i + '</td>';
         if (r == m - 1) {
           row += '</tr>';
