@@ -3,9 +3,14 @@
 from __future__ import annotations
 
 import argparse
+from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
+
+from glyphs.display import configure_matplotlib, show_or_save
+
+configure_matplotlib()
+import matplotlib.pyplot as plt  # noqa: E402
 
 
 def main() -> None:
@@ -13,7 +18,14 @@ def main() -> None:
     parser.add_argument(
         "--demo",
         action="store_true",
-        help="Show a simple sine plot to verify matplotlib and numpy",
+        help="Plot a simple sine curve to verify matplotlib and numpy",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        metavar="PATH",
+        help="Save the figure to PATH instead of opening a window",
     )
     args = parser.parse_args()
 
@@ -24,7 +36,7 @@ def main() -> None:
         plt.title("glyphs demo")
         plt.xlabel("x")
         plt.ylabel("sin(x)")
-        plt.show()
+        show_or_save(args.output)
     else:
         parser.print_help()
 
