@@ -25,6 +25,8 @@ def stroke(style: str, x: FloatArray) -> tuple[FloatArray, FloatArray]:
     """
     x = np.asarray(x, dtype=float)
     match style:
+        case 'base':
+            return _stroke_base(x)
         case '60':
             return _stroke_60(x)
         case '64':
@@ -33,16 +35,27 @@ def stroke(style: str, x: FloatArray) -> tuple[FloatArray, FloatArray]:
             raise ValueError(f"Unknown stroke style: {style}")
 
 
+def _stroke_base(x: FloatArray) -> tuple[FloatArray, FloatArray]:
+    i = abs(x) <= 1/16
+    y1 = np.zeros_like(x)
+    y1[i] = (1 + np.cos(16*np.pi*x[i]))/4 - 1/2
+    y2 = np.zeros_like(x) - 1/2
+    return y1, y2
+
+
 def _stroke_60(x: FloatArray) -> tuple[FloatArray, FloatArray]:
-    y1 = (1 - (4 * x - 1) ** 2) / 4
-    # log(2x) is undefined at x=0; limit of y2 is 0 there (y1=0, denom→∞)
-    y2 = np.zeros_like(y1)
-    positive = x > 0
-    y2[positive] = y1[positive] / (1 - np.log(2 * x[positive]))
+    i = x > 0
+    y1 = np.zeros_like(x)
+    y1[i] = (1 - (4*x[i] - 1)**2)/4
+    y2 = np.zeros_like(x)
+    y2[i] = y1[i]/(1 - np.log(2*x[i]))
     return y1, y2
 
 
 def _stroke_64(x: FloatArray) -> tuple[FloatArray, FloatArray]:
-    y1 = (1 - np.abs(4 * x - 1) ** 0.5) / 2
-    y2 = y1 * 4 / 5
+    i = x > 0
+    y1 = np.zeros_like(x)
+    y1[i] = (1 - np.abs(4*x[i] - 1)**(1/2))/2
+    y2 = 4*y1/5
     return y1, y2
+
