@@ -1,8 +1,8 @@
 """Smoke tests for package metadata."""
 
-import gyphs
+import glyphs
 
 
 def test_version_is_string() -> None:
-    assert isinstance(gyphs.__version__, str)
-    assert gyphs.__version__
+    assert isinstance(glyphs.__version__, str)
+    assert glyphs.__version__

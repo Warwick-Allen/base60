@@ -1,4 +1,4 @@
-"""Console entry point for gyphs."""
+"""Console entry point for glyphs."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import numpy as np
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Gyphs plotting toolkit")
+    parser = argparse.ArgumentParser(description="Glyphs plotting toolkit")
     parser.add_argument(
         "--demo",
         action="store_true",
@@ -21,7 +21,7 @@ def main() -> None:
         x = np.linspace(0, 2 * np.pi, 200)
         y = np.sin(x)
         plt.plot(x, y)
-        plt.title("gyphs demo")
+        plt.title("glyphs demo")
         plt.xlabel("x")
         plt.ylabel("sin(x)")
         plt.show()

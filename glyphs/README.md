@@ -1,4 +1,4 @@
-# gyphs
+# glyphs
 
 Python toolkit for glyph plotting and visualisation, built on [NumPy](https://numpy.org/) and [Matplotlib](https://matplotlib.org/).
 
@@ -21,19 +21,19 @@ pip install -e ".[dev]"
 Run the demo plot to confirm dependencies are working:
 
 ```bash
-gyphs --demo
+glyphs --demo
 ```
 
 Or invoke the module directly:
 
 ```bash
-python -m gyphs --demo
+python -m glyphs --demo
 ```
 
 ## Project layout
 
 ```
-src/gyphs/     # package source
+src/glyphs/     # package source
 tests/         # tests (pytest)
 ```
 
