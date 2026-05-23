@@ -21,6 +21,12 @@ def main() -> None:
         help="Plot a simple sine curve to verify matplotlib and numpy",
     )
     parser.add_argument(
+        "--stroke",
+        type=int,
+        metavar="N",
+        help="Render stroke glyph N (e.g. --stroke=60)",
+    )
+    parser.add_argument(
         "-o",
         "--output",
         type=Path,
@@ -36,6 +42,23 @@ def main() -> None:
         plt.title("glyphs demo")
         plt.xlabel("x")
         plt.ylabel("sin(x)")
+        show_or_save(args.output)
+    elif args.stroke is not None:
+        k = 0.5
+        n = 500
+        x = np.linspace(0, k, n)
+        match args.stroke:
+            case 60:
+                y1 = (1 - (4 * x - 1) ** 2) / 4
+                # log(2x) is undefined at x=0; limit of y2 is 0 there (y1=0, denom→∞)
+                y2 = np.zeros_like(y1)
+                positive = x > 0
+                y2[positive] = y1[positive]/(1 - np.log(2*x[positive]))
+            case _:
+                raise ValueError(f"Unknown stroke: {args.stroke}")
+        plt.fill_between(x, y1, y2, color='green')
+        plt.xlim(0, k)
+        plt.ylim(0, k)
         show_or_save(args.output)
     else:
         parser.print_help()

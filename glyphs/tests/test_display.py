@@ -14,6 +14,7 @@ from glyphs.display import backend_is_interactive, configure_matplotlib, show_or
 @pytest.fixture(autouse=True)
 def reset_backend() -> None:
     matplotlib.use("Agg", force=True)
+    plt.switch_backend("Agg")
     yield
     plt.close("all")
 
@@ -41,6 +42,8 @@ def test_show_or_save_default_when_headless(
 ) -> None:
     monkeypatch.chdir(tmp_path)
     monkeypatch.delenv("DISPLAY", raising=False)
+    monkeypatch.delenv("WAYLAND_DISPLAY", raising=False)
+    monkeypatch.setenv("MPLBACKEND", "Agg")
     configure_matplotlib()
 
     plt.plot([0, 1], [1, 0])

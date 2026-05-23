@@ -22,7 +22,7 @@ def configure_matplotlib() -> None:
 
     has_display = bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
     if not has_display:
-        matplotlib.use("Agg")
+        matplotlib.use("Agg", force=True)
         return
 
     for backend in _INTERACTIVE_BACKENDS:
