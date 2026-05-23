@@ -45,14 +45,18 @@ def main() -> None:
         plt.ylabel("sin(x)")
         show_or_save(args.output)
     elif args.stroke is not None:
-        k = 1/(16 if args.stroke == 'base' else 2)
-        l = 1/2
-        n = 1000
-        x = np.linspace(-k, k, n)
-        y1, y2 = stroke(args.stroke, x)
-        plt.fill_between(x, y1, y2, color='green')
-        plt.xlim(-l, l)
-        plt.ylim(-l, l)
+        if args.stroke == "base":
+            x_min = -1/16
+            x_max =  1/16
+        else:
+            x_min = 0
+            x_max = 1/2
+        n = int(2000 * (x_max - x_min))
+        lim = 1/2
+        x, y1, y2 = stroke(args.stroke, x_min, x_max, n)
+        plt.fill_between(x, y1, y2, color="green")
+        plt.xlim(-lim, lim)
+        plt.ylim(-lim, lim)
         show_or_save(args.output)
     else:
         parser.print_help()
