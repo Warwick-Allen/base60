@@ -23,9 +23,9 @@ def main() -> None:
     )
     parser.add_argument(
         "--stroke",
-        type=int,
-        metavar="N",
-        help="Render stroke glyph N (e.g. --stroke=60)",
+        type=str,
+        metavar="STYLE",
+        help="Render stroke glyph STYLE (e.g. --stroke='60')",
     )
     parser.add_argument(
         "-o",
