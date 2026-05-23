@@ -17,7 +17,7 @@ def stroke(
     Parameters
     ----------
     style:
-        Stroke identifier (supported: ``'base'``, ``'60'``, ``'64'``).
+        Stroke identifier (supported: ``'60base'``, ``'64base'``, ``'60'``, ``'64'``).
     n:
         Number of sample points.
 
@@ -30,8 +30,10 @@ def stroke(
     if n < 2:
         raise ValueError(f"n must be at least 2, got {n}")
     match style:
-        case "base":
-            x, y1, y2 = _stroke_base(int(n/4))
+        case "60base":
+            x, y1, y2 = _stroke_60base(int(n/4))
+        case "64base":
+            x, y1, y2 = _stroke_64base(int(n/4))
         case "60":
             x, y1, y2 = _stroke_60(n)
         case "64":
@@ -41,13 +43,25 @@ def stroke(
     return x, y1, y2
 
 
-def _stroke_base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
-    x_min = -1/16
-    x_max =  1/16
+def _stroke_60base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
+    width = 1/32
+    x_min = -width
+    x_max =  width
     x = np.linspace(x_min, x_max, n, dtype=float)
-    i = abs(x) <= 1 / 16
     y1 = np.zeros_like(x)
-    y1[i] = (1 + np.cos(16 * np.pi * x[i])) / 4 - 1 / 2
+    y1 = (1 + np.cos(np.pi * x / width)) / 4 - 1 / 2
+    y2 = np.zeros_like(x) - 1 / 2
+    return x, y1, y2
+
+
+def _stroke_64base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
+    width = 1/64
+    x_min = -width
+    x_max =  width
+    x = np.linspace(x_min, x_max, n, dtype=float)
+    y1 = np.zeros_like(x)
+    y1 = (1 + np.cos(np.pi * x / width)) / 4 - 1 / 2
+    y1 = ((2*y1 + 1)**(1/16) - 1)/2
     y2 = np.zeros_like(x) - 1 / 2
     return x, y1, y2
 
