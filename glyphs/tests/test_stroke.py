@@ -5,38 +5,39 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from glyphs.stroke import stroke
+from glyphs.encoding import glyph_for_digit
+from glyphs.placement import Placement
+from glyphs.scheme import Scheme
+from glyphs.stroke import glyph_strokes, sample_arm, sample_base
 
 
-@pytest.mark.parametrize("style", ["60", "64"])
-def test_stroke_returns_matching_shapes(style: str) -> None:
-    x, y1, y2 = stroke(style, 0.0, 0.5, 50)
-    assert x.shape == (50,)
-    assert y1.shape == x.shape
-    assert y2.shape == x.shape
-    assert np.all(np.isfinite(y1))
-    assert np.all(np.isfinite(y2))
-    assert x[0] == pytest.approx(0.0)
-    assert x[-1] == pytest.approx(0.5)
+def test_sample_base_shapes() -> None:
+    for scheme in Scheme:
+        geom = sample_base(scheme, 40)
+        assert geom.x_upper.shape == geom.y1.shape == geom.y2.shape
+        assert np.all(np.isfinite(geom.y1))
 
 
-def test_stroke_60_at_origin() -> None:
-    x, y1, y2 = stroke("60", 0.0, 0.5, 3)
-    assert x[0] == pytest.approx(0.0)
-    assert y1[0] == pytest.approx(0.0)
-    assert y2[0] == pytest.approx(0.0)
+@pytest.mark.parametrize("placement", list(Placement))
+def test_sample_arm_finite(placement: Placement) -> None:
+    for scheme in (Scheme.S60, Scheme.S64):
+        geom = sample_arm(scheme, placement, 50)
+        assert np.all(np.isfinite(geom.y1))
+        assert np.all(np.isfinite(geom.y2))
 
 
-def test_stroke_accepts_float_n() -> None:
-    x, y1, y2 = stroke("64", 0.0, 0.5, 50.0)
-    assert len(x) == 50
+def test_stroke_60_arm_at_origin() -> None:
+    geom = sample_arm(Scheme.S60, Placement.BIT_4, 3)
+    assert geom.y1[0] == pytest.approx(0.0)
+    assert geom.y2[0] == pytest.approx(0.0)
 
 
 def test_n_too_small_raises() -> None:
     with pytest.raises(ValueError, match="n must be at least 2"):
-        stroke("64", 0.0, 0.5, 1)
+        sample_arm(Scheme.S64, Placement.BIT_0, 1)
 
 
-def test_unknown_style_raises() -> None:
-    with pytest.raises(ValueError, match="Unknown stroke style"):
-        stroke("99", 0.0, 0.5, 10)
+def test_glyph_strokes_from_digit() -> None:
+    glyph = glyph_for_digit(Scheme.S60, 5)  # bits 0 and 2
+    strokes = glyph_strokes(glyph, 30)
+    assert len(strokes) == 1 + 2

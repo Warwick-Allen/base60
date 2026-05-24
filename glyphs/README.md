@@ -1,6 +1,8 @@
 # glyphs
 
-Python toolkit for glyph plotting and visualisation, built on [NumPy](https://numpy.org/) and [Matplotlib](https://matplotlib.org/).
+Python toolkit for **base-60** and **base-64** glyph characters, built on [NumPy](https://numpy.org/) and [Matplotlib](https://matplotlib.org/).
+
+Each character is a **base stroke** plus zero to six **arm strokes** in one scheme (`60` or `64`). Arms are encoded as a **6-bit bitmap** (digits `0`–`59` for scheme 60, `0`–`63` for scheme 64).
 
 ## Requirements
 
@@ -8,53 +10,81 @@ Python toolkit for glyph plotting and visualisation, built on [NumPy](https://nu
 
 ## Setup
 
-Create a virtual environment and install the package in editable mode:
-
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -e ".[dev]"
 ```
 
+## Coordinate frame
+
+- Canvas: `(-0.5, -0.5)` to `(0.5, 0.5)`
+- Base tip at `(0, 0)`
+- Canonical arm (before rotation) runs from the base toward `(0.5, 0)`
+
+## Bitmap encoding (arm bits)
+
+| Bit     | Sign | Rotation | Tip              |
+|---------|------|----------|------------------|
+| 0 (LSB) | `+`  | `π`      | `(-0.5, 0)` left |
+| 1       | `-`  | `π`      | `(-0.5, 0)`      |
+| 2       | `+`  | `π/2`    | `(0, 0.5)` above |
+| 3       | `-`  | `π/2`    | `(0, 0.5)`       |
+| 4       | `+`  | `0`      | `(0.5, 0)` right |
+| 5 (MSB) | `-`  | `0`      | `(0.5, 0)`       |
+
+Digit **12** = bits 2 and 3 set (`π/2` + and `π/2` −):
+
+```
+ ( )
+  |
+```
+
+Scheme **60** forbids digits **60–63** (invalid in base 60).
+
 ## Usage
 
-Run the demo plot to confirm dependencies are working:
+Render a digit (scheme 60, digit 12):
 
 ```bash
-glyphs --demo
+glyphs --scheme 60 --digit 12 -o twelve.png
 ```
 
-Or invoke the module directly:
+Base only (digit 0):
 
 ```bash
-python -m glyphs --demo
+glyphs --scheme 64 --digit 0 -o zero.png
 ```
 
-Save to a file explicitly (works everywhere, including headless WSL):
+Manual arms:
 
 ```bash
-glyphs --demo -o demo.png
+glyphs --scheme 60 --placement 90+ --placement 90- -o manual.png
 ```
 
-### WSL and graphical backends
+Placement tokens: `180+`, `180-`, `90+`, `90-`, `0+`, `0-`.
 
-On Ubuntu WSL, Matplotlib often defaults to the non-interactive **Agg** backend even when `DISPLAY` is set (for example under WSLg). Without a GUI toolkit, `plt.show()` cannot open a window.
+### Python API
 
-If `glyphs --demo` cannot find an interactive backend, it saves `glyphs-demo.png` in the current directory and prints the path.
+```python
+from glyphs import Scheme, glyph_for_digit, plot_glyph
 
-For an interactive window, install Tk support for your system Python (the venv uses it):
-
-```bash
-sudo apt install python3-tk
+glyph = glyph_for_digit(Scheme.S60, 12)
+plot_glyph(glyph)
 ```
-
-Then run `glyphs --demo` again from a session with `DISPLAY` set (WSLg and most X11 setups do this automatically). Alternatively, keep using `-o` to write PNG files and open them from Windows or your file manager.
 
 ## Project layout
 
 ```
-src/glyphs/     # package source
-tests/         # tests (pytest)
+src/glyphs/
+  scheme.py      # Scheme.S60 / S64
+  placement.py   # six arm slots (bitmap bits)
+  encoding.py    # digit ↔ placements
+  glyph.py       # Glyph dataclass
+  stroke.py      # curve sampling
+  plot.py        # Matplotlib rendering
+  display.py     # backends / save
+tests/
 ```
 
 ## Development
@@ -63,3 +93,7 @@ tests/         # tests (pytest)
 pytest
 ruff check src tests
 ```
+
+### WSL
+
+If no GUI backend is available, plots are saved automatically; see earlier notes on `python3-tk` or use `-o out.png`.
