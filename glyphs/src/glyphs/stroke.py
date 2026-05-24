@@ -55,13 +55,11 @@ def _stroke_60base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
 
 
 def _stroke_64base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
-    width = 1/64
+    width = 1/96
     x_min = -width
     x_max =  width
     x = np.linspace(x_min, x_max, n, dtype=float)
-    y1 = np.zeros_like(x)
-    y1 = (1 + np.cos(np.pi * x / width)) / 4 - 1 / 2
-    y1 = ((2*y1 + 1)**(1/16) - 1)/2
+    y1 = (1 - (x/width)**4)**(1/2)/2 - 1/2
     y2 = np.zeros_like(x) - 1 / 2
     return x, y1, y2
 
