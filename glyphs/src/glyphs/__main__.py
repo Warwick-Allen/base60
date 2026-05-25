@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import warnings
 from pathlib import Path
 
 import numpy as np
@@ -14,7 +13,6 @@ from glyphs.glyph import Glyph
 from glyphs.placement import Placement
 from glyphs.plot import plot_glyph
 from glyphs.scheme import Scheme
-from glyphs.stroke import stroke
 from glyphs.svg import save_glyph_svg
 
 configure_matplotlib()
@@ -75,12 +73,6 @@ def main() -> None:
         help="Hide axes and decorations; show only the glyph",
     )
     parser.add_argument(
-        "--stroke",
-        type=str,
-        metavar="STYLE",
-        help="(Deprecated) Render a single legacy stroke style",
-    )
-    parser.add_argument(
         "-o",
         "--output",
         type=Path,
@@ -98,20 +90,6 @@ def main() -> None:
         else:
             plot_glyph(glyph, clean=args.clean)
             show_or_save(args.output)
-    elif args.stroke is not None:
-        warnings.warn(
-            "--stroke is deprecated; use --scheme with --digit or --placement",
-            DeprecationWarning,
-            stacklevel=1,
-        )
-        n = 1000
-        x, y1, y2 = stroke(args.stroke, n)
-        plt.fill_between(x, y1, y2, color="green")
-        lim = 0.5
-        plt.xlim(-lim, lim)
-        plt.ylim(-lim, lim)
-        plt.gca().set_aspect("equal")
-        show_or_save(args.output)
     else:
         parser.print_help()
 

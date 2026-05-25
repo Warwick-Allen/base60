@@ -167,33 +167,6 @@ def _sample_64_arm(n: int, sign: int) -> tuple[FloatArray, FloatArray, FloatArra
     )
 
 
-def stroke(
-    style: str,
-    n: int,
-) -> tuple[FloatArray, FloatArray, FloatArray]:
-    """Deprecated: sample a single stroke by legacy style name."""
-    warnings.warn(
-        "stroke() is deprecated; use sample_stem, sample_arm, or glyph_strokes",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    n = int(n)
-    if n < 2:
-        raise ValueError(f"n must be at least 2, got {n}")
-    match style:
-        case "60stem":
-            geom = sample_stem(Scheme.S60, n)
-        case "64stem":
-            geom = sample_stem(Scheme.S64, n)
-        case "60":
-            geom = sample_arm(Scheme.S60, Placement.BIT_2, n)
-        case "64":
-            geom = sample_arm(Scheme.S64, Placement.BIT_4, n)
-        case _:
-            raise ValueError(f"Unknown stroke style: {style}")
-    return geom.x_upper, geom.y1, geom.y2
-
-
 @dataclass(frozen=True)
 class CubicSegment:
     x0: float
