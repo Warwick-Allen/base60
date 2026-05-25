@@ -41,11 +41,6 @@ def _build_glyph_from_args(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Glyphs plotting toolkit")
     parser.add_argument(
-        "--demo",
-        action="store_true",
-        help="Plot a simple sine curve to verify matplotlib and numpy",
-    )
-    parser.add_argument(
         "--scheme",
         type=_parse_scheme,
         metavar="{60,64}",
@@ -94,15 +89,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    if args.demo:
-        x = np.linspace(0, 2 * np.pi, 200)
-        y = np.sin(x)
-        plt.plot(x, y)
-        plt.title("glyphs demo")
-        plt.xlabel("x")
-        plt.ylabel("sin(x)")
-        show_or_save(args.output)
-    elif args.scheme is not None:
+    if args.scheme is not None:
         glyph = _build_glyph_from_args(args.scheme, args.digit, args.placements, args.force)
         use_svg = args.svg or (args.output is not None and args.output.suffix.lower() == ".svg")
         if use_svg:

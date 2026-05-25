@@ -50,5 +50,5 @@ def test_show_or_save_default_when_headless(
     with pytest.warns(UserWarning, match="No interactive matplotlib backend"):
         path = show_or_save()
     assert path is not None
-    assert path.name == "glyphs-demo.png"
+    assert path.name == "glyphs.png"
     assert path.is_file()

@@ -43,7 +43,7 @@ def backend_is_interactive() -> bool:
 def show_or_save(
     output: Path | None = None,
     *,
-    default_name: str = "glyphs-demo.png",
+    default_name: str = "glyphs.png",
 ) -> Path | None:
     """Show the current figure interactively, or save it when no GUI is available."""
     import matplotlib.pyplot as plt
