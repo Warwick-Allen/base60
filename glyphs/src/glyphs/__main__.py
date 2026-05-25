@@ -69,6 +69,11 @@ def main() -> None:
         help="Allow digits 60-63 in base-60 scheme (normally restricted to 0-59)",
     )
     parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Hide axes and decorations; show only the glyph",
+    )
+    parser.add_argument(
         "--stroke",
         type=str,
         metavar="STYLE",
@@ -93,7 +98,7 @@ def main() -> None:
         show_or_save(args.output)
     elif args.scheme is not None:
         glyph = _build_glyph_from_args(args.scheme, args.digit, args.placements, args.force)
-        plot_glyph(glyph)
+        plot_glyph(glyph, clean=args.clean)
         show_or_save(args.output)
     elif args.stroke is not None:
         warnings.warn(

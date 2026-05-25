@@ -38,6 +38,7 @@ def plot_glyph(
     stem_colour: str = "black",
     arm_colour: str = "black",
     arm_alpha: float = 1.0,
+    clean: bool = False,
 ) -> Axes:
     """Draw a full glyph on the given axes (or create a new figure)."""
     import matplotlib.pyplot as plt
@@ -51,4 +52,7 @@ def plot_glyph(
     ax.set_xlim(*CANVAS_LIMIT_X)
     ax.set_ylim(*CANVAS_LIMIT_Y)
     ax.set_aspect("equal")
+    if clean:
+        # Hide axes decorations so only the glyph is visible
+        ax.set_axis_off()
     return ax
