@@ -105,8 +105,8 @@ def _sample_60_arm(n: int, sign: int) -> tuple[FloatArray, FloatArray, FloatArra
     y1 = np.zeros_like(x)
     i1 = x <  1/8
     i2 = x >= 1/8
-    y1[i1] = sign *      -8*x[i1]**3 +    3*x[i1]**2 +   3/8*x[i1]
-    y1[i2] = sign * -184/27*x[i2]**3 + 23/9*x[i2]**2 + 31/72*x[i2] - 1/432
+    y1[i1] = sign*(   -8   *x[i1]**3 +  3  *x[i1]**2 +  3/ 8*x[i1]         )
+    y1[i2] = sign*( -184/27*x[i2]**3 + 23/9*x[i2]**2 + 31/72*x[i2] - 1/432 )
     y2 = 3/4*y1
     return x, y1, y2
 
@@ -116,8 +116,8 @@ def _sample_64_arm(n: int, sign: int) -> tuple[FloatArray, FloatArray, FloatArra
     y1 = np.zeros_like(x)
     i1 = (x <  1/8) & (x < 1/4)
     i2 = (x >= 1/8) & (x < 1/4)
-    y1[i1] = sign *      24*x[i1]**3 -    9*x[i1]**2 +  11/8*x[i1]
-    y1[i2] = sign *      72*x[i2]**3 -   27*x[i2]**2 +  29/8*x[i2] - 3/32
+    y1[i1] = sign*(   24   *x[i1]**3 -  9  *x[i1]**2 + 11/ 8*x[i1]         )
+    y1[i2] = sign*(   72   *x[i2]**3 - 27  *x[i2]**2 + 29/ 8*x[i2] - 3/ 32 )
     y1[x >= 1/4] = y1[x < 1/4][::-1]
     y2 = 3/4*y1
     return x, y1, y2
