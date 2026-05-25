@@ -45,15 +45,15 @@ def _rotate_stroke(
     )
 
 
-def sample_base(scheme: Scheme, n: int) -> StrokeGeometry:
-    """Sample the base stroke for a scheme."""
+def sample_stem(scheme: Scheme, n: int) -> StrokeGeometry:
+    """Sample the stem stroke for a scheme."""
     n = int(n)
     base_n = max(2, int(n / _BASE_N_RATIO))
     match scheme:
         case Scheme.S60:
-            return _as_geometry(*_sample_60base(base_n))
+            return _as_geometry(*_sample_60stem(base_n))
         case Scheme.S64:
-            return _as_geometry(*_sample_64base(base_n))
+            return _as_geometry(*_sample_64stem(base_n))
 
 
 def sample_arm(scheme: Scheme, placement: Placement, n: int) -> StrokeGeometry:
@@ -72,15 +72,15 @@ def sample_arm(scheme: Scheme, placement: Placement, n: int) -> StrokeGeometry:
 
 
 def glyph_strokes(glyph: Glyph, n: int) -> list[StrokeGeometry]:
-    """Sample base plus all arm strokes for a glyph."""
+    """Sample stem plus all arm strokes for a glyph."""
     n = int(n)
-    strokes = [sample_base(glyph.scheme, n)]
+    strokes = [sample_stem(glyph.scheme, n)]
     for placement in sorted(glyph.arms, key=lambda p: p.bit_index):
         strokes.append(sample_arm(glyph.scheme, placement, n))
     return strokes
 
 
-def _sample_base_common(n: int, thinness: int, coeffs: tuple[float, float, float, float]) -> tuple[FloatArray, FloatArray, FloatArray]:
+def _sample_stem_common(n: int, thinness: int, coeffs: tuple[float, float, float, float]) -> tuple[FloatArray, FloatArray, FloatArray]:
     width = 1/(2*thinness)
     x = np.linspace(-width, width, n, dtype=float)
     y1 = np.zeros_like(x)/2
@@ -92,12 +92,12 @@ def _sample_base_common(n: int, thinness: int, coeffs: tuple[float, float, float
     return x, y1, y2
 
 
-def _sample_60base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
-    return _sample_base_common(n, 16, (16, -12, 0, 0))
+def _sample_60stem(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
+    return _sample_stem_common(n, 16, (16, -12, 0, 0))
 
 
-def _sample_64base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
-    return _sample_base_common(n, 32, (25/2, -41/4, 0, 0))
+def _sample_64stem(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
+    return _sample_stem_common(n, 32, (25/2, -41/4, 0, 0))
 
 
 def _sample_arm_common(
@@ -172,7 +172,7 @@ def stroke(
 ) -> tuple[FloatArray, FloatArray, FloatArray]:
     """Deprecated: sample a single stroke by legacy style name."""
     warnings.warn(
-        "stroke() is deprecated; use sample_base, sample_arm, or glyph_strokes",
+        "stroke() is deprecated; use sample_stem, sample_arm, or glyph_strokes",
         DeprecationWarning,
         stacklevel=2,
     )
@@ -180,10 +180,10 @@ def stroke(
     if n < 2:
         raise ValueError(f"n must be at least 2, got {n}")
     match style:
-        case "60base":
-            geom = sample_base(Scheme.S60, n)
-        case "64base":
-            geom = sample_base(Scheme.S64, n)
+        case "60stem":
+            geom = sample_stem(Scheme.S60, n)
+        case "64stem":
+            geom = sample_stem(Scheme.S64, n)
         case "60":
             geom = sample_arm(Scheme.S60, Placement.BIT_2, n)
         case "64":

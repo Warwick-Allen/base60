@@ -8,12 +8,12 @@ import pytest
 from glyphs.encoding import glyph_for_digit
 from glyphs.placement import Placement
 from glyphs.scheme import Scheme
-from glyphs.stroke import glyph_strokes, sample_arm, sample_base
+from glyphs.stroke import glyph_strokes, sample_arm, sample_stem
 
 
-def test_sample_base_shapes() -> None:
+def test_sample_stem_shapes() -> None:
     for scheme in Scheme:
-        geom = sample_base(scheme, 40)
+        geom = sample_stem(scheme, 40)
         assert geom.x_upper.shape == geom.y1.shape == geom.y2.shape
         assert np.all(np.isfinite(geom.y1))
 

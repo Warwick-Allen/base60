@@ -2,7 +2,7 @@
 
 Python toolkit for **base-60** and **base-64** glyph characters, built on [NumPy](https://numpy.org/) and [Matplotlib](https://matplotlib.org/).
 
-Each character is a **base stroke** plus zero to six **arm strokes** in one scheme (`60` or `64`). Arms are encoded as a **6-bit bitmap** (digits `0`–`59` for scheme 60, `0`–`63` for scheme 64).
+Each character is a **stem stroke** plus zero to six **arm strokes** in one scheme (`60` or `64`). Arms are encoded as a **6-bit bitmap** (digits `0`–`59` for scheme 60, `0`–`63` for scheme 64).
 
 ## Requirements
 
@@ -19,8 +19,8 @@ pip install -e ".[dev]"
 ## Coordinate frame
 
 - Canvas: `(-0.5, -0.5)` to `(0.5, 0.5)`
-- Base tip at `(0, 0)`
-- Canonical arm (before rotation) runs from the base toward `(0.5, 0)`
+- Stem tip at `(0, 0)`
+- Canonical arm (before rotation) runs from the stem toward `(0.5, 0)`
 
 ## Bitmap encoding (arm bits)
 
@@ -50,7 +50,7 @@ Render a digit (scheme 60, digit 12):
 glyphs --scheme 60 --digit 12 -o twelve.png
 ```
 
-Base only (digit 0):
+Stem only (digit 0):
 
 ```bash
 glyphs --scheme 64 --digit 0 -o zero.png

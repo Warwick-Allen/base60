@@ -1,4 +1,4 @@
-"""Composable glyph: base stroke plus arm placements."""
+"""Composable glyph: stem stroke plus arm placements."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from glyphs.scheme import Scheme
 
 @dataclass(frozen=True)
 class Glyph:
-    """A single character: one scheme, base stroke, and zero to six arms."""
+    """A single character: one scheme, stem stroke, and zero to six arms."""
 
     scheme: Scheme
     arms: frozenset[Placement]

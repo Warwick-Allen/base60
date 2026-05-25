@@ -30,7 +30,7 @@ def plot_glyph(
     n: int = 1000,
     *,
     ax: Axes | None = None,
-    base_colour: str = "black",
+    stem_colour: str = "black",
     arm_colour: str = "black",
     arm_alpha: float = 1.0,
 ) -> Axes:
@@ -40,7 +40,7 @@ def plot_glyph(
     if ax is None:
         _, ax = plt.subplots()
     strokes = glyph_strokes(glyph, n)
-    _fill_stroke(ax, strokes[0], color=base_colour, alpha=1.0)
+    _fill_stroke(ax, strokes[0], color=stem_colour, alpha=1.0)
     for geom in strokes[1:]:
         _fill_stroke(ax, geom, color=arm_colour, alpha=arm_alpha)
     ax.set_xlim(-CANVAS_LIMIT, CANVAS_LIMIT)
