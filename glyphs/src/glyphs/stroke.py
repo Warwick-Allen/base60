@@ -192,3 +192,165 @@ def stroke(
         case _:
             raise ValueError(f"Unknown stroke style: {style}")
     return geom.x_upper, geom.y1, geom.y2
+
+
+@dataclass(frozen=True)
+class CubicSegment:
+    x0: float
+    y0: float
+    x1: float
+    y1: float
+    x2: float
+    y2: float
+    x3: float
+    y3: float
+
+
+def _format_number(value: float) -> str:
+    return format(value, ".6g")
+
+
+def _evaluate_cubic(x: float, coeffs: tuple[float, float, float, float]) -> float:
+    a, b, c, d = coeffs
+    return ((a * x + b) * x + c) * x + d
+
+
+def _cubic_controls(
+    x0: float,
+    x3: float,
+    coeffs: tuple[float, float, float, float],
+) -> tuple[float, float, float, float]:
+    y0 = _evaluate_cubic(x0, coeffs)
+    y3 = _evaluate_cubic(x3, coeffs)
+    length = x3 - x0
+    a, b, c, _ = coeffs
+    c1 = (3 * a * x0 * x0 + 2 * b * x0 + c) * length
+    c2 = (3 * a * x0 + b) * (length * length)
+    y1 = y0 + c1 / 3
+    y2 = y0 + c2 / 3 + 2 * c1 / 3
+    return x0 + length / 3, y1, x0 + 2 * length / 3, y2
+
+
+def _make_segment(
+    x0: float,
+    x3: float,
+    coeffs: tuple[float, float, float, float],
+) -> CubicSegment:
+    y0 = _evaluate_cubic(x0, coeffs)
+    y3 = _evaluate_cubic(x3, coeffs)
+    x1, y1, x2, y2 = _cubic_controls(x0, x3, coeffs)
+    return CubicSegment(x0, y0, x1, y1, x2, y2, x3, y3)
+
+
+def _mirror_polynomial_at_half(
+    coeffs: tuple[float, float, float, float]
+) -> tuple[float, float, float, float]:
+    a, b, c, d = coeffs
+    anchor = 0.5
+    return (
+        -a,
+        3 * a * anchor + b,
+        -3 * a * anchor * anchor - 2 * b * anchor - c,
+        a * anchor**3 + b * anchor**2 + c * anchor + d,
+    )
+
+
+def _stem_path_string(scheme: Scheme) -> str:
+    match scheme:
+        case Scheme.S60:
+            thinness = 16
+            coeffs = (16.0, -12.0, 0.0, 0.0)
+        case Scheme.S64:
+            thinness = 32
+            coeffs = (25 / 2, -41 / 4, 0.0, 0.0)
+        case _:
+            raise ValueError(f"Unsupported scheme: {scheme}")
+
+    width = 1 / (2 * thinness)
+    left_coeffs = (-coeffs[0], coeffs[1], -coeffs[2], coeffs[3])
+    left_segment = _make_segment(-width, 0.0, left_coeffs)
+    right_segment = _make_segment(0.0, width, coeffs)
+    bottom = -1 / 4
+
+    return (
+        f"M{_format_number(left_segment.x0)},{_format_number(left_segment.y0)} "
+        f"C{_format_number(left_segment.x1)},{_format_number(left_segment.y1)} "
+        f"{_format_number(left_segment.x2)},{_format_number(left_segment.y2)} "
+        f"{_format_number(left_segment.x3)},{_format_number(left_segment.y3)} "
+        f"C{_format_number(right_segment.x1)},{_format_number(right_segment.y1)} "
+        f"{_format_number(right_segment.x2)},{_format_number(right_segment.y2)} "
+        f"{_format_number(right_segment.x3)},{_format_number(right_segment.y3)} "
+        f"L{_format_number(right_segment.x3)},{_format_number(bottom)} "
+        f"L{_format_number(left_segment.x0)},{_format_number(bottom)}Z"
+    )
+
+
+def _arm_top_segments(scheme: Scheme) -> list[CubicSegment]:
+    match scheme:
+        case Scheme.S60:
+            coeffs1 = (-8.0, 3.0, 3 / 8, 0.0)
+            coeffs2 = (-184 / 27, 23 / 9, 31 / 72, -1 / 432)
+            split = 1 / 8
+            mirror_at = None
+        case Scheme.S64:
+            coeffs1 = (24.0, -9.0, 11 / 8, 0.0)
+            coeffs2 = (72.0, -27.0, 29 / 8, -3 / 32)
+            split = 1 / 8
+            mirror_at = 1 / 4
+        case _:
+            raise ValueError(f"Unsupported scheme: {scheme}")
+
+    boundaries = [0.0, split]
+    if mirror_at is None:
+        boundaries.append(0.5)
+    else:
+        boundaries.extend([mirror_at, 0.5 - split, 0.5])
+    boundaries = sorted(set(boundaries))
+
+    segments: list[CubicSegment] = []
+    for x0, x1 in zip(boundaries, boundaries[1:]):
+        midpoint = (x0 + x1) / 2
+        if mirror_at is None:
+            selected = coeffs1 if midpoint <= split else coeffs2
+        elif x1 <= mirror_at:
+            selected = coeffs1 if midpoint <= split else coeffs2
+        else:
+            selected = (
+                _mirror_polynomial_at_half(coeffs2)
+                if midpoint <= 0.5 - split
+                else _mirror_polynomial_at_half(coeffs1)
+            )
+        segments.append(_make_segment(x0, x1, selected))
+    return segments
+
+
+def _arm_path_string(scheme: Scheme) -> str:
+    segments = _arm_top_segments(scheme)
+    top_path = ["M0,0"]
+    for seg in segments:
+        top_path.append(
+            f"C{_format_number(seg.x1)},{_format_number(seg.y1)} "
+            f"{_format_number(seg.x2)},{_format_number(seg.y2)} "
+            f"{_format_number(seg.x3)},{_format_number(seg.y3)}"
+        )
+
+    bottom_scale = 3 / 4
+    end_x = segments[-1].x3
+    end_y = segments[-1].y3
+    bottom_path = [f"L{_format_number(end_x)},{_format_number(end_y * bottom_scale)}"]
+    for seg in reversed(segments):
+        bottom_path.append(
+            f"C{_format_number(seg.x2)},{_format_number(seg.y2 * bottom_scale)} "
+            f"{_format_number(seg.x1)},{_format_number(seg.y1 * bottom_scale)} "
+            f"{_format_number(seg.x0)},{_format_number(seg.y0 * bottom_scale)}"
+        )
+    bottom_path.append("Z")
+    return " ".join(top_path + bottom_path)
+
+
+def stem_svg_path_data(scheme: Scheme) -> str:
+    return _stem_path_string(scheme)
+
+
+def arm_svg_path_data(scheme: Scheme) -> str:
+    return _arm_path_string(scheme)

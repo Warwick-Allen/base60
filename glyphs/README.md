@@ -62,6 +62,20 @@ Manual arms:
 glyphs --scheme 60 --placement 90+ --placement 90- -o manual.png
 ```
 
+Export exact SVG output with analytic cubic curves:
+
+```bash
+glyphs --scheme 60 --digit 12 --svg -o twelve.svg
+```
+
+A filename ending in `.svg` also selects SVG export automatically:
+
+```bash
+glyphs --scheme 64 --digit 0 -o zero.svg
+```
+
+Generated SVG files use exact cubic Bezier path data and reuse repeated arm stroke geometry, so they are minimal and do not rasterize the glyph.
+
 Placement tokens: `180+`, `180-`, `90+`, `90-`, `0+`, `0-`.
 
 ### Python API

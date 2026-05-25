@@ -15,6 +15,7 @@ from glyphs.placement import Placement
 from glyphs.plot import plot_glyph
 from glyphs.scheme import Scheme
 from glyphs.stroke import stroke
+from glyphs.svg import save_glyph_svg
 
 configure_matplotlib()
 import matplotlib.pyplot as plt  # noqa: E402
@@ -69,6 +70,11 @@ def main() -> None:
         help="Allow digits 60-63 in base-60 scheme (normally restricted to 0-59)",
     )
     parser.add_argument(
+        "--svg",
+        action="store_true",
+        help="Export the glyph as an exact SVG image instead of raster output",
+    )
+    parser.add_argument(
         "--clean",
         action="store_true",
         help="Hide axes and decorations; show only the glyph",
@@ -98,8 +104,13 @@ def main() -> None:
         show_or_save(args.output)
     elif args.scheme is not None:
         glyph = _build_glyph_from_args(args.scheme, args.digit, args.placements, args.force)
-        plot_glyph(glyph, clean=args.clean)
-        show_or_save(args.output)
+        use_svg = args.svg or (args.output is not None and args.output.suffix.lower() == ".svg")
+        if use_svg:
+            output = args.output or Path("glyph.svg")
+            save_glyph_svg(glyph, output)
+        else:
+            plot_glyph(glyph, clean=args.clean)
+            show_or_save(args.output)
     elif args.stroke is not None:
         warnings.warn(
             "--stroke is deprecated; use --scheme with --digit or --placement",

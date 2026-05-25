@@ -6,6 +6,7 @@ from glyphs.placement import Placement
 from glyphs.plot import plot_glyph
 from glyphs.scheme import Scheme
 from glyphs.stroke import StrokeGeometry, glyph_strokes, sample_arm, sample_stem
+from glyphs.svg import glyph_to_svg, save_glyph_svg
 
 __all__ = [
     "Glyph",
@@ -19,6 +20,8 @@ __all__ = [
     "plot_glyph",
     "sample_arm",
     "sample_stem",
+    "glyph_to_svg",
+    "save_glyph_svg",
     "__version__",
 ]
 __version__ = "0.1.0"
