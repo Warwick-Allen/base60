@@ -1,1 +1,11 @@
+# Editors
 *.sw[op]
+**/.vscode
+*.code-workspace
+
+# Images
+*.png
+*.svg
+
+# Python
+**/.venv
