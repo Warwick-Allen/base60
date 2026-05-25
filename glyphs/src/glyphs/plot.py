@@ -12,7 +12,10 @@ from glyphs.stroke import StrokeGeometry, glyph_strokes
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
-CANVAS_LIMIT = 0.5
+OFFSET_X = 1/2
+OFFSET_Y = 1/4
+CANVAS_LIMIT_X = [-1/2 + OFFSET_X, 1/2 + OFFSET_X]
+CANVAS_LIMIT_Y = [-1/2 + OFFSET_Y, 1/2 + OFFSET_Y]
 
 
 def _fill_stroke(ax: Axes, geom: StrokeGeometry, *, color: str, alpha: float) -> None:
@@ -22,7 +25,9 @@ def _fill_stroke(ax: Axes, geom: StrokeGeometry, *, color: str, alpha: float) ->
             np.column_stack([geom.x_lower[::-1], geom.y2[::-1]]),
         ]
     )
-    ax.fill(verts[:, 0], verts[:, 1], color=color, alpha=alpha)
+    xs = verts[:, 0] + OFFSET_X
+    ys = verts[:, 1] + OFFSET_Y
+    ax.fill(xs, ys, color=color, alpha=alpha)
 
 
 def plot_glyph(
@@ -43,7 +48,7 @@ def plot_glyph(
     _fill_stroke(ax, strokes[0], color=stem_colour, alpha=1.0)
     for geom in strokes[1:]:
         _fill_stroke(ax, geom, color=arm_colour, alpha=arm_alpha)
-    ax.set_xlim(-CANVAS_LIMIT, CANVAS_LIMIT)
-    ax.set_ylim(-CANVAS_LIMIT, CANVAS_LIMIT)
+    ax.set_xlim(*CANVAS_LIMIT_X)
+    ax.set_ylim(*CANVAS_LIMIT_Y)
     ax.set_aspect("equal")
     return ax
