@@ -100,27 +100,70 @@ def _sample_64base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
     return _sample_base_common(n, 32, (25/2, -41/4, 0, 0))
 
 
-def _sample_60_arm(n: int, sign: int) -> tuple[FloatArray, FloatArray, FloatArray]:
+def _sample_arm_common(
+    n: int,
+    sign: int,
+    coeffs1: tuple[float, float, float, float],
+    coeffs2: tuple[float, float, float, float],
+    *,
+    split: float = 1/8,
+    mirror_at: float | None = None,
+) -> tuple[FloatArray, FloatArray, FloatArray]:
     x = np.linspace(0, 0.5, n, dtype=float)
+
+    def eval_piecewise(values: FloatArray) -> FloatArray:
+        y = np.zeros_like(values)
+        i1 = values < split
+        i2 = ~i1
+        if np.any(i1):
+            y[i1] = (
+                  coeffs1[0]*values[i1]**3
+                + coeffs1[1]*values[i1]**2
+                + coeffs1[2]*values[i1]
+                + coeffs1[3]
+            )
+        if np.any(i2):
+            y[i2] = (
+                  coeffs2[0]*values[i2]**3
+                + coeffs2[1]*values[i2]**2
+                + coeffs2[2]*values[i2]
+                + coeffs2[3]
+            )
+        return y
+
     y1 = np.zeros_like(x)
-    i1 = x <  1/8
-    i2 = x >= 1/8
-    y1[i1] = sign*(   -8   *x[i1]**3 +  3  *x[i1]**2 +  3/ 8*x[i1]         )
-    y1[i2] = sign*( -184/27*x[i2]**3 + 23/9*x[i2]**2 + 31/72*x[i2] - 1/432 )
+    if mirror_at is None:
+        y1 = eval_piecewise(x)
+    else:
+        left  = x <  mirror_at
+        right = x >= mirror_at
+        if np.any(left):
+            y1[left] = eval_piecewise(x[left])
+        if np.any(right):
+            y1[right] = eval_piecewise(0.5 - x[right])
+    y1 *= sign
     y2 = 3/4*y1
     return x, y1, y2
+
+
+def _sample_60_arm(n: int, sign: int) -> tuple[FloatArray, FloatArray, FloatArray]:
+    return _sample_arm_common(
+        n,
+        sign,
+        (     -8,    3,   3/8, 0     ),
+        (-184/27, 23/9, 31/72, -1/432)
+    )
 
 
 def _sample_64_arm(n: int, sign: int) -> tuple[FloatArray, FloatArray, FloatArray]:
-    x = np.linspace(0, 0.5, n, dtype=float)
-    y1 = np.zeros_like(x)
-    i1 = (x <  1/8) & (x < 1/4)
-    i2 = (x >= 1/8) & (x < 1/4)
-    y1[i1] = sign*(   24   *x[i1]**3 -  9  *x[i1]**2 + 11/ 8*x[i1]         )
-    y1[i2] = sign*(   72   *x[i2]**3 - 27  *x[i2]**2 + 29/ 8*x[i2] - 3/ 32 )
-    y1[x >= 1/4] = y1[x < 1/4][::-1]
-    y2 = 3/4*y1
-    return x, y1, y2
+    return _sample_arm_common(
+        n,
+        sign,
+        (24,  -9, 11/8,  0   ),
+        (72, -27, 29/8, -3/32),
+        split = 1/8,
+        mirror_at = 1/4,
+    )
 
 
 def stroke(
