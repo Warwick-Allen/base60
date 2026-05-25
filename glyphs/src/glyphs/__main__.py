@@ -25,12 +25,12 @@ def _parse_scheme(value: str) -> Scheme:
 
 
 def _build_glyph_from_args(
-    scheme: Scheme, digit: int | None, placements: list[str] | None
+    scheme: Scheme, digit: int | None, placements: list[str] | None, force: bool = False
 ) -> Glyph:
     if digit is not None and placements:
         raise SystemExit("Use either --digit or --placement, not both")
     if digit is not None:
-        return glyph_for_digit(scheme, digit)
+        return glyph_for_digit(scheme, digit, force=force)
     if placements:
         arms = frozenset(Placement.parse(t) for t in placements)
         return Glyph(scheme, arms)
@@ -64,6 +64,11 @@ def main() -> None:
         help="Arm placement token (180+, 180-, 90+, 90-, 0+, 0-); repeatable",
     )
     parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Allow digits 60-63 in base-60 scheme (normally restricted to 0-59)",
+    )
+    parser.add_argument(
         "--stroke",
         type=str,
         metavar="STYLE",
@@ -87,7 +92,7 @@ def main() -> None:
         plt.ylabel("sin(x)")
         show_or_save(args.output)
     elif args.scheme is not None:
-        glyph = _build_glyph_from_args(args.scheme, args.digit, args.placements)
+        glyph = _build_glyph_from_args(args.scheme, args.digit, args.placements, args.force)
         plot_glyph(glyph)
         show_or_save(args.output)
     elif args.stroke is not None:

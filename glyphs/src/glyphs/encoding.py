@@ -12,13 +12,23 @@ def placements_from_digit(digit: int) -> frozenset[Placement]:
     return frozenset(Placement.from_bit(i) for i in range(6) if digit & (1 << i))
 
 
-def glyph_for_digit(scheme: Scheme, digit: int) -> Glyph:
-    """Build a glyph from a scheme digit (0..59 or 0..63)."""
-    max_digit = scheme.max_digit()
-    if not 0 <= digit <= max_digit:
-        raise ValueError(
-            f"digit {digit} out of range for scheme {scheme.value} (0..{max_digit})"
-        )
+def glyph_for_digit(scheme: Scheme, digit: int, force: bool = False) -> Glyph:
+    """Build a glyph from a scheme digit (0..59 or 0..63).
+    
+    Args:
+        scheme: The numbering scheme (S60 or S64)
+        digit: The digit value (0-59 for S60, 0-63 for S64, or 0-63 with force=True)
+        force: If True, allow digits 60-63 in base-60 scheme; otherwise enforce scheme max
+    """
+    if not 0 <= digit <= 63:
+        raise ValueError(f"digit {digit} out of range (must be 0..63)")
+    if not force:
+        max_digit = scheme.max_digit()
+        if digit > max_digit:
+            raise ValueError(
+                f"digit {digit} out of range for scheme {scheme.value} (0..{max_digit}); "
+                f"use --force to allow extended digits"
+            )
     return Glyph(scheme, placements_from_digit(digit))
 
 
