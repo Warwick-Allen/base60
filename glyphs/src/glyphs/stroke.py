@@ -81,10 +81,15 @@ def glyph_strokes(glyph: Glyph, n: int) -> list[StrokeGeometry]:
 
 
 def _sample_60base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
-    width = 1 / 32
+    thinness = 16
+    width = 1/(2*thinness)
     x = np.linspace(-width, width, n, dtype=float)
-    y1 = (1 + np.cos(np.pi * x / width)) / 4 - 1 / 2
-    y2 = np.full_like(x, -1 / 2)
+    y1 = np.zeros_like(x)/2
+    i = x > 0
+    xi = thinness * x[i]
+    y1[x > 0] = (16*xi**3 - 12*xi**2)/2
+    y1[x < 0] = y1[x > 0][::-1]
+    y2 = np.full_like(x, -1/2)
     return x, y1, y2
 
 
