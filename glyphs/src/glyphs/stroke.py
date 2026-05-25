@@ -115,10 +115,12 @@ def _sample_60_arm(n: int, sign: int) -> tuple[FloatArray, FloatArray, FloatArra
 def _sample_64_arm(n: int, sign: int) -> tuple[FloatArray, FloatArray, FloatArray]:
     x = np.linspace(0, 0.5, n, dtype=float)
     y1 = np.zeros_like(x)
-    y2 = np.zeros_like(x)
-    positive = x > 0
-    y1[positive] = sign * (1 - np.abs(4 * x[positive] - 1) ** 0.5) / 4
-    y2[positive] = 4 * y1[positive] / 5
+    i1 = (x <  1/8) & (x < 1/4)
+    i2 = (x >= 1/8) & (x < 1/4)
+    y1[i1] = sign *      24*x[i1]**3 -    9*x[i1]**2 +  11/8*x[i1]
+    y1[i2] = sign *      72*x[i2]**3 -   27*x[i2]**2 +  29/8*x[i2] - 3/32
+    y1[x >= 1/4] = y1[x < 1/4][::-1]
+    y2 = 3/4*y1
     return x, y1, y2
 
 
