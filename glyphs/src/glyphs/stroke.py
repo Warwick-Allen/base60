@@ -88,7 +88,8 @@ def _sample_stem_common(n: int, thinness: int, coeffs: tuple[float, float, float
     xi = thinness * x[i]
     y1[x > 0] = (coeffs[0]*xi**3 + coeffs[1]*xi**2 + coeffs[2]*xi + coeffs[3])/2
     y1[x < 0] = y1[x > 0][::-1]
-    y2 = np.full_like(x, -1/2)
+    y1 /= 2
+    y2 = np.full_like(x, -1/4)
     return x, y1, y2
 
 
