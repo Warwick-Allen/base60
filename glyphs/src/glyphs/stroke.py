@@ -80,25 +80,24 @@ def glyph_strokes(glyph: Glyph, n: int) -> list[StrokeGeometry]:
     return strokes
 
 
-def _sample_60base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
-    thinness = 16
+def _sample_base_common(n: int, thinness: int, coeffs: tuple[float, float, float, float]) -> tuple[FloatArray, FloatArray, FloatArray]:
     width = 1/(2*thinness)
     x = np.linspace(-width, width, n, dtype=float)
     y1 = np.zeros_like(x)/2
     i = x > 0
     xi = thinness * x[i]
-    y1[x > 0] = (16*xi**3 - 12*xi**2)/2
+    y1[x > 0] = (coeffs[0]*xi**3 + coeffs[1]*xi**2 + coeffs[2]*xi + coeffs[3])/2
     y1[x < 0] = y1[x > 0][::-1]
     y2 = np.full_like(x, -1/2)
     return x, y1, y2
 
 
+def _sample_60base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
+    return _sample_base_common(n, 16, (16, -12, 0, 0))
+
+
 def _sample_64base(n: int) -> tuple[FloatArray, FloatArray, FloatArray]:
-    width = 1 / 96
-    x = np.linspace(-width, width, n, dtype=float)
-    y1 = (1 - (x / width) ** 4) ** 0.5 / 2 - 1 / 2
-    y2 = np.full_like(x, -1 / 2)
-    return x, y1, y2
+    return _sample_base_common(n, 32, (25/2, -41/4, 0, 0))
 
 
 def _sample_60_arm(n: int, sign: int) -> tuple[FloatArray, FloatArray, FloatArray]:
