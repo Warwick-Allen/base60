@@ -15,8 +15,13 @@ _CANVAS_OFFSET_X = 0.5
 _CANVAS_OFFSET_Y = 0.25
 
 
-def glyph_to_svg(glyph: Glyph) -> str:
-    """Return exact SVG markup for a glyph."""
+def glyph_to_svg(glyph: Glyph, size: int = 400) -> str:
+    """Return exact SVG markup for a glyph.
+    
+    Args:
+        glyph: The glyph to render
+        size: Output size in pixels (width and height, default 400)
+    """
     stem_id = f"stem-{glyph.scheme.value}"
     arm_id = f"arm-{glyph.scheme.value}"
 
@@ -38,7 +43,7 @@ def glyph_to_svg(glyph: Glyph) -> str:
 
     return dedent(
         f"""
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 {-_CANVAS_OFFSET_Y} 1 1" preserveAspectRatio="xMidYMid meet">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 {-_CANVAS_OFFSET_Y} 1 1" width="{size}" height="{size}" preserveAspectRatio="xMidYMid meet">
           <defs>
             {path_defs}
           </defs>
