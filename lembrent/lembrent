@@ -1,0 +1,52 @@
+#!/usr/bin/perl -l
+
+# SYNOPSIS
+#     lembrent BASE [NUMBER...]
+#
+# DESCRIPTION
+#     lembrent prints the name of the NUMBERs in the Lembrent base-60/base-64
+#     number naming scheme.  BASE must be either 60 or 64.
+#
+# EXAMPLES
+#     $ ./lembrent 60 1 2 3 59 3623 $((3*60**3 + 2*60**2 + 60))
+#     seet-eet
+#     seet-een
+#     seet-eent
+#     seet-lembent
+#     seent-eet-ee-emrent
+#     sere-eent-een-eet-ee
+#
+#     $ ./lembrent 64 1 2 3 63 $((3*64**3 + 2*64**2 + 64))
+#     keet-eet
+#     keet-een
+#     keet-eent
+#     keet-lembrent
+#     kere-eent-een-eet-ee
+
+$USAGE = "$0 BASE [NUMBER...]";
+$BASE = shift;
+$p = $BASE == 60 ? 's' :
+     $BASE == 64 ? 'k' :
+     die "Only base-60 and base-64 is supported. $USAGE";
+
+@LETTERS = split //, 'lembrent';
+sub a{
+  $n = shift;
+  join '', grep {$_ eq 'e' || ($n<<=1)&64} @LETTERS
+}
+
+sub b;
+sub b{
+  $d = shift;
+  return '' if !$d;
+  my $m = $d % $BASE;
+  $d = ($d - $m)/$BASE;
+  b($d).'-'.a$m
+}
+
+for (@ARGV){
+  $c = ($b = b$_) =~ tr/-// or print $p.'ee' and next;
+  $_ = b$c;
+  s/-/$p/;
+  print $_.$b
+}
