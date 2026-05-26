@@ -1,0 +1,10 @@
+$B=60;$p=$B==60?'s':$B==64?'k':die;sub
+a{$n=shift;join'',grep{$_
+eq'e'||($n<<=1)&64}split//,'lembrent'}sub
+b;sub
+b{$d=shift;return''if!$d;my$m=$d%$B;$d=($d-$m)/$B;b($d).'-'.a$m}sub
+c{$c=($b=b$_)=~tr/-//
+or
+return'ee';local$_=b$c;s/-/$p/;$_.$b}printf"%10d:%s\n",$_,c
+for
+0..$B+1,map{$B**$_-1..$B**$_+1}2..5
