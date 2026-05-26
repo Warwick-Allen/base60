@@ -4,8 +4,45 @@
 #     lembrent BASE [NUMBER...]
 #
 # DESCRIPTION
-#     lembrent prints the name of the NUMBERs in the Lembrent base-60/base-64
-#     number naming scheme.  BASE must be either 60 or 64.
+#     lembrent prints the name of the NUMBERs in the Lembrent Base-60
+#     ("Lembrent-60) or Lembrent Base-64 ("Lembrent-64") number naming scheme.
+#     BASE must be either 60 or 64.
+#
+#   The Lembrent-60 and Lembrent-64 Number Naming Schemes
+#
+#     Within each digit, each consonant has a unique and consistent bit value:
+#       l = 2⁵ (32)
+#       m = 2⁴ (16)
+#       b = 2³ ( 8)
+#       r = 2² ( 4)
+#       n = 2¹ ( 2)
+#       t = 2⁰ ( 1)
+#
+#     A digit’s value is the sum of the bit values of the consonants present in
+#     its name.
+#
+#     For example, the digit "leme" has a value of 2⁵ + 2⁴ = 48. The two vowels
+#     "e" serve as fixed scaffolding and carry no value.  "l" (when present)
+#     always precedes the first "e", "m", "b" and "r" appear between the two
+#     two "e"s, and "n" and "t" follow the second "e".  A zero digit is simply
+#     "ee".
+#
+#     The name of a Lembrent number consists of:
+#     - A *length digit*, prefixed with a base indicator ("s" for base-60 or "k"
+#       for base-64), indicating the number of *significant digits* that follow.
+#     - The *significant digits* themselves (in base-60 or base-64), each
+#       prefixed with a hyphen.
+#
+#     For example, 70 in Lembrent-60 is represented as:
+#         "s"     (base-60)
+#       + "een"   (length digit indicating two significant digits)
+#       + "-eet"  (2⁰ × 60¹)
+#       + "-eben" ((2³ + 2¹) × 60⁰),
+#     resulting in "seen-eet-eben".
+#
+#     The length digit is optional for numbers whose value is less than 64
+#     (i.e., single-digit numbers).  The number zero may be written as "see",
+#     "kee", or simply "ee".
 #
 # EXAMPLES
 #     $ ./lembrent 60 1 2 3 59 3623 $((3*60**3 + 2*60**2 + 60))
