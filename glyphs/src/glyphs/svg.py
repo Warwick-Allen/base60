@@ -36,7 +36,7 @@ def glyph_to_svg(glyph: Glyph, size: int = 400) -> str:
         angle = math.degrees(placement.rotation_angle())
         transform = f"rotate({angle:.6g})"
         if placement.sign() < 0:
-            transform = f"scale(1,-1) {transform}"
+            transform = f"scale(-1,1) {transform}"
         uses.append(
             f'<use href="#{arm_id}" fill="black" transform="{transform}"/>'
         )
