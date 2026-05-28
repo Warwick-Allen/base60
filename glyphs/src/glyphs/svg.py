@@ -47,7 +47,7 @@ def glyph_to_svg(glyph: Glyph, size: int = 400) -> str:
           <defs>
             {path_defs}
           </defs>
-          <g transform="translate({_CANVAS_OFFSET_X},{-_CANVAS_OFFSET_Y}) scale(1,-1)">
+          <g transform="translate({_CANVAS_OFFSET_X},{_CANVAS_OFFSET_Y}) scale(1,-1)">
             {' '.join(uses)}
           </g>
         </svg>
