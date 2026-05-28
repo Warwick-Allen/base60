@@ -43,11 +43,11 @@ def glyph_to_svg(glyph: Glyph, size: int = 400) -> str:
 
     return dedent(
         f"""
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 {_CANVAS_OFFSET_Y} 1 1" width="{size}" height="{size}" preserveAspectRatio="xMidYMid meet">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 {-_CANVAS_OFFSET_Y} 1 1" width="{size}" height="{size}" preserveAspectRatio="xMidYMid meet">
           <defs>
             {path_defs}
           </defs>
-          <g transform="translate({_CANVAS_OFFSET_X},{_CANVAS_OFFSET_Y})">
+          <g transform="translate({_CANVAS_OFFSET_X},{-_CANVAS_OFFSET_Y}) scale(1,-1)">
             {' '.join(uses)}
           </g>
         </svg>
