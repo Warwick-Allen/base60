@@ -52,18 +52,48 @@
   </table>
 
   <script>
-    // === Helper: Convert number to English words (simple implementation) ===
-    // For brevity — replace with library if you want better wording/handling.
+    // Updated: Helper - number to English words for arbitrarily large integers
     function numToWords(n) {
-      const ones = ["zero","one","two","three","four","five","six","seven","eight","nine"];
-      const tens = ["","ten","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
-      if (n < 10) return ones[n];
-      if (n < 20) return ["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"][n-10];
-      if (n < 100) return tens[Math.floor(n/10)] + (n%10 !== 0 ? "-" + ones[n%10] : "");
-      if (n < 1000) return ones[Math.floor(n/100)] + " hundred" + (n%100 !== 0 ? " and " + numToWords(n%100) : "");
-      if (n < 1000000) return numToWords(Math.floor(n/1000)) + " thousand" + (n%1000 !== 0 ? ", " + numToWords(n%1000) : "");
-      return n.toLocaleString();
+      if (n === 0) return 'zero';
+      const ones = ["","one","two","three","four","five","six","seven","eight","nine"];
+      const teens = ["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+      const tens = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+      const scales = ["","thousand","million","billion","trillion"];
+
+      function inWords(num) {
+        let word = '';
+        if (num >= 100) {
+          word += ones[Math.floor(num / 100)] + " hundred";
+          num %= 100;
+          if (num) word += " and ";
+        }
+        if (num >= 20) {
+          word += tens[Math.floor(num / 10)];
+          num %= 10;
+          if (num) word += "-" + ones[num];
+        } else if (num >= 10) {
+          word += teens[num - 10];
+        } else if (num > 0) {
+          word += ones[num];
+        }
+        return word;
+      }
+
+      let result = "";
+      let scale = 0;
+      while (n > 0) {
+        let chunk = n % 1000;
+        if (chunk) {
+          let chunkWords = inWords(chunk);
+          if (scales[scale]) chunkWords += " " + scales[scale];
+          result = chunkWords + (result ? ", " : "") + result;
+        }
+        n = Math.floor(n / 1000);
+        scale += 1;
+      }
+      return result.trim();
     }
+
     function sep(x) { return x.toLocaleString(); }
 
     // === Helper: Fetch Lembrent number info from API ===
