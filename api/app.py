@@ -15,15 +15,7 @@ from pathlib import Path as Pathlib
 from collections import OrderedDict
 from typing import List
 
-# --- Static files serving ---
-from fastapi.staticfiles import StaticFiles
-
 app = FastAPI(title="Lembrent + Glyphs API")
-
-# Serve static files (e.g. HTML, JS, CSS) from the 'static' dir at root path
-STATIC_DIR = Pathlib(__file__).parent.parent / "static"
-if STATIC_DIR.exists():
-    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
 
 # Project layout
 # filesystem helpers
@@ -77,4 +69,8 @@ class LRUCache:
 
 # ...rest of code remains unchanged: all API endpoints etc ...
 
-# [The rest of your app.py follows here unchanged]
+# === MOUNT STATIC FILES ONLY AT THE END ===
+from fastapi.staticfiles import StaticFiles
+STATIC_DIR = Pathlib(__file__).parent.parent / "static"
+if STATIC_DIR.exists():
+    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
