@@ -8,6 +8,7 @@ import asyncio
 import concurrent.futures
 import threading
 import uuid
+import logging
 from pathlib import Path as Pathlib
 from collections import OrderedDict
 from typing import List
@@ -58,6 +59,12 @@ class LRUCache:
         with self.lock:
             return {"size": len(self.data), "maxsize": self.maxsize, "hits": self.hits, "misses": self.misses}
 
+    def clear(self):
+        with self.lock:
+            self.data.clear()
+            self.hits = 0
+            self.misses = 0
+
 
 def compute_cache_version() -> str:
     # Prefer git short SHA if available, else fallback to mtimes
@@ -81,14 +88,42 @@ def compute_cache_version() -> str:
         return "nocacheversion"
 
 
-CACHE_VERSION = compute_cache_version()
-CACHE_BASE = DISK_CACHE_DIR / CACHE_VERSION
+# Current cache version (may change during runtime)
+CURRENT_CACHE_VERSION = compute_cache_version()
+
+def get_cache_base() -> Pathlib:
+    return DISK_CACHE_DIR / CURRENT_CACHE_VERSION
 
 # Ensure cache base exists
-CACHE_BASE.mkdir(parents=True, exist_ok=True)
+get_cache_base().mkdir(parents=True, exist_ok=True)
 
 # In-memory cache
 mem_cache = LRUCache(MAX_CACHE_ENTRIES)
+
+# Logging
+logger = logging.getLogger(__name__)
+cache_version_lock = threading.Lock()
+
+
+def check_and_invalidate_cache():
+    """Recompute cache version; if it changed, clear in-memory cache and switch cache base."""
+    global CURRENT_CACHE_VERSION
+    try:
+        new_version = compute_cache_version()
+    except Exception:
+        return
+    with cache_version_lock:
+        if new_version != CURRENT_CACHE_VERSION:
+            logger.info(f"Cache version changed: {CURRENT_CACHE_VERSION} -> {new_version}; clearing caches")
+            try:
+                mem_cache.clear()
+            except Exception:
+                pass
+            CURRENT_CACHE_VERSION = new_version
+            try:
+                get_cache_base().mkdir(parents=True, exist_ok=True)
+            except Exception:
+                pass
 
 # Thread pool for blocking IO
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=API_MAX_WORKERS)
@@ -106,7 +141,7 @@ def to_base_digits(number: int, radix: int) -> List[int]:
 
 
 def disk_cache_path(radix: int, digit: int, typ: str, clean: bool = True, force: bool = True) -> Pathlib:
-    subdir = CACHE_BASE / str(radix)
+    subdir = get_cache_base() / str(radix)
     subdir.mkdir(parents=True, exist_ok=True)
     flags = f"c{int(bool(clean))}_f{int(bool(force))}"
     filename = f"{digit}.{typ}.{flags}"
@@ -228,6 +263,9 @@ async def lembent_endpoint(
     want_name = bool(int(name))
     want_svg = bool(int(svg))
     want_png = bool(int(png))
+
+    # Invalidate cache if source files changed since last check
+    check_and_invalidate_cache()
 
     if radix not in (60, 64):
         raise HTTPException(status_code=400, detail="radix must be 60 or 64")
