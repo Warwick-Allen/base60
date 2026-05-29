@@ -35,9 +35,14 @@ def glyph_to_svg(glyph: Glyph, size: int = 400) -> str:
     uses = [f'<use href="#{stem_id}" fill="black"/>']
     for placement in sorted(glyph.arms, key=lambda p: p.bit_index):
         angle = math.degrees(placement.rotation_angle())
+        # Leave the parent group's `scale(1,-1)` in place (it keeps the
+        # stem orientation correct) and make the arm use transforms be a
+        # rotation plus an optional sign flip. The parent flip will then
+        # mirror the arm strokes across y'=0 as requested, without
+        # modifying the stem.
         transform = f"rotate({angle:.6g})"
         if placement.sign() < 0:
-            transform = f"scale(-1,1) {transform}"
+            transform += " scale(1,-1)"
         uses.append(
             f'<use href="#{arm_id}" fill="black" transform="{transform}"/>'
         )
