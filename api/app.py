@@ -9,6 +9,8 @@ import concurrent.futures
 import threading
 import uuid
 import logging
+import shutil
+import time
 from pathlib import Path as Pathlib
 from collections import OrderedDict
 from typing import List
@@ -26,6 +28,8 @@ DISK_CACHE_DIR = Pathlib(os.getenv("DISK_CACHE_DIR", PROJECT_ROOT / "api" / "cac
 MAX_CACHE_ENTRIES = int(os.getenv("MAX_CACHE_ENTRIES", "2048"))
 API_MAX_WORKERS = int(os.getenv("API_MAX_WORKERS", "8"))
 CACHE_TTL_SECONDS = int(os.getenv("CACHE_TTL_SECONDS", "0"))  # 0 => no TTL
+KEEP_CACHE_VERSIONS = int(os.getenv("KEEP_CACHE_VERSIONS", "3"))
+MAX_CACHE_AGE_DAYS = int(os.getenv("MAX_CACHE_AGE_DAYS", "30"))
 
 
 class LRUCache:
@@ -124,6 +128,12 @@ def check_and_invalidate_cache():
                 get_cache_base().mkdir(parents=True, exist_ok=True)
             except Exception:
                 pass
+            # prune old cache dirs asynchronously
+            try:
+                executor.submit(prune_old_cache_dirs)
+            except Exception:
+                # executor may not be ready during early init; ignore
+                pass
 
 # Thread pool for blocking IO
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=API_MAX_WORKERS)
@@ -146,6 +156,47 @@ def disk_cache_path(radix: int, digit: int, typ: str, clean: bool = True, force:
     flags = f"c{int(bool(clean))}_f{int(bool(force))}"
     filename = f"{digit}.{typ}.{flags}"
     return subdir / filename
+
+
+def prune_old_cache_dirs(keep: int = KEEP_CACHE_VERSIONS, max_age_days: int = MAX_CACHE_AGE_DAYS):
+    """Prune old cache version directories under DISK_CACHE_DIR, keeping at most `keep` latest directories and removing directories older than `max_age_days` days.
+
+    This is safe-limited to subdirectories of DISK_CACHE_DIR.
+    """
+    base = Pathlib(DISK_CACHE_DIR)
+    if not base.exists():
+        return
+    try:
+        entries = [p for p in base.iterdir() if p.is_dir()]
+    except Exception:
+        return
+    if not entries:
+        return
+    # sort by modification time (newest first)
+    entries_sorted = sorted(entries, key=lambda p: p.stat().st_mtime if p.exists() else 0, reverse=True)
+    current_name = get_cache_base().name
+    # names to keep: newest `keep` plus the current cache
+    keep_names = set(p.name for p in entries_sorted[:max(keep, 0)])
+    keep_names.add(current_name)
+    now = time.time()
+    cutoff = now - (max_age_days * 86400) if max_age_days and max_age_days > 0 else None
+    for p in entries_sorted:
+        if p.name in keep_names:
+            continue
+        try:
+            if cutoff is not None:
+                try:
+                    mtime = p.stat().st_mtime
+                except Exception:
+                    mtime = 0
+                if mtime > cutoff:
+                    # not old enough to prune
+                    continue
+            # delete
+            shutil.rmtree(p)
+            logger.info(f"Pruned old cache directory {p}")
+        except Exception as e:
+            logger.warning(f"Failed to prune cache dir {p}: {e}")
 
 
 def read_disk_cache(path: Pathlib, binary: bool):
@@ -306,3 +357,16 @@ async def lembent_endpoint(
 @app.get("/metrics")
 def metrics():
     return mem_cache.stats()
+
+
+@app.on_event("startup")
+def on_startup():
+    # Ensure cache version is current and perform an initial prune asynchronously
+    try:
+        check_and_invalidate_cache()
+    except Exception:
+        pass
+    try:
+        executor.submit(prune_old_cache_dirs)
+    except Exception:
+        pass
