@@ -239,10 +239,24 @@ def _stem_path_string(scheme: Scheme) -> str:
         case _:
             raise ValueError(f"Unsupported scheme: {scheme}")
 
+    # The sampled stem used by Matplotlib evaluates the base polynomial at
+    # xi = thinness * x and then scales the result by 1/4. To make the SVG
+    # cubic segments match those sampled curves exactly we must use the
+    # equivalent polynomial in the x coordinate space of the stem (i.e.
+    # absorb the thinness scaling and the 1/4 factor into the coefficients).
     width = 1 / (2 * thinness)
-    left_coeffs = (-coeffs[0], coeffs[1], -coeffs[2], coeffs[3])
+    a, b, c, d = coeffs
+    # Scale coefficients: f(x) = (a*(thin*x)^3 + b*(thin*x)^2 + c*(thin*x) + d)/4
+    scaled_coeffs = (
+        a * (thinness ** 3) / 4,
+        b * (thinness ** 2) / 4,
+        c * thinness / 4,
+        d / 4,
+    )
+    # Left side is a mirrored copy of the right (g(-x) = -A x^3 + B x^2 - C x + D)
+    left_coeffs = (-scaled_coeffs[0], scaled_coeffs[1], -scaled_coeffs[2], scaled_coeffs[3])
     left_segment = _make_segment(-width, 0.0, left_coeffs)
-    right_segment = _make_segment(0.0, width, coeffs)
+    right_segment = _make_segment(0.0, width, scaled_coeffs)
     bottom = -1 / 4
 
     return (
