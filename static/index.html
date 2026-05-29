@@ -4,23 +4,34 @@
   <meta charset="UTF-8">
   <title>Lembrent-60 and Lembrent-64 Demonstration</title>
   <style>
-    body { font-family: sans-serif; }
-    .glyph { display: inline-block; min-width: 2em; vertical-align: middle; }
-    .number-entry { font-size: 1.2em; margin: 0.6em 0; }
-    .label     { font-weight: bold; }
-    table.samples { border-collapse: collapse; margin-top: 1em; }
-    table.samples td, table.samples th { padding: 0.3em 0.6em; border: 1px solid #ddd; }
-    .equation-row { margin: 0.5em 0 1em 0; }
-    .glyph-svg { width: 2em; height: 2em; vertical-align: middle; }
+    body              { font-family: sans-serif; }
+    .glyph            { display: inline-block; min-width: 2em;
+                        vertical-align: middle; }
+    .number-entry     { font-size: 1.2em; margin: 0.6em 0; }
+    .label            { font-weight: bold; }
+    .lembrent svg     { width: 6%; }
+    table.samples     { border-collapse: collapse; margin-top: 1em; }
+    table.samples td,
+    table.samples th  { border: 1px solid #ddd; padding: 0.3em 0.6em;
+                        text-align: right; }
+    .equation-row     { margin: 0.5em 0 1em 0; }
+    .glyph-svg        { width: 2em; height: 2em; vertical-align: middle; }
   </style>
 </head>
 <body>
   <h1>Lembrent-60 and Lembrent-64 Numbering Schemes</h1>
   <p>
-    This page demonstrates <b>Lembrent-60</b> (base-60) and <b>Lembrent-64</b> (base-64) numbering schemes.
-    These systems assign each digit a unique glyph and a name, constructed from consonant bits ("l", "m", "b", "r", "n", "t") and vowels as per the <a href="https://github.com/Warwick-Allen/base60" target="_blank">base60 project</a>.
-    The schemes use glyphs with arms encoded as a 6-bit bitmap, and names constructed consistently from bit values (see <tt>lembrent/lembrent</tt> for details).
-    For every integer, the notation is available in decimal, Lembrent-60 (using s prefix), and Lembrent-64 (using k prefix).
+    This page demonstrates <b>Lembrent-60</b> (base-60) and <b>Lembrent-64</b>
+    (base-64) numbering schemes.
+    These systems assign each digit a unique glyph and a name, constructed from
+    consonant bits ("l", "m", "b", "r", "n", "t") and vowels as per the
+    <a href="https://github.com/Warwick-Allen/base60" target="_blank"
+    >base60 project</a>.
+    The schemes use glyphs with arms encoded as a 6-bit bitmap, and names
+    constructed consistently from bit values (see <tt>lembrent/lembrent</tt>
+    for details).
+    For every integer, the notation is available in decimal, Lembrent-60 (using
+    an <em>s</em> prefix), and Lembrent-64 (using a <em>k</em> prefix).
   </p>
 
   <hr>
@@ -28,16 +39,20 @@
   <h2>Try an Equation</h2>
   <form id="equation-form">
     <label for="equation-input" class="label">Enter a simple equation:</label>
-    <input id="equation-input" type="text" value="123 + 456 * 2" size="30" autocomplete="off">
+    <input id="equation-input" type="text" value="123 + 456 * 2" size="30"
+           autocomplete="off">
     <button type="submit">Calculate</button>
   </form>
-  <div id="output"></div>
+  <div class="lembrent" id="output"></div>
 
   <hr>
 
   <h2>Sample Numbers</h2>
-  <p>The following table shows various numbers in decimal, their English wording, Lembrent-60 and Lembrent-64 glyphs and names.</p>
-  <table class="samples" id="samples-table">
+  <p>
+    The following table shows various numbers in decimal, their English wording,
+    Lembrent-60 and Lembrent-64 glyphs and names.
+  </p>
+  <table class="lembrent samples" id="samples-table">
     <thead>
       <tr>
         <th>Decimal</th>
@@ -55,10 +70,13 @@
     // Updated: Helper - number to English words for arbitrarily large integers
     function numToWords(n) {
       if (n === 0) return 'zero';
-      const ones = ["","one","two","three","four","five","six","seven","eight","nine"];
-      const teens = ["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
-      const tens = ["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
-      const scales = ["","thousand","million","billion","trillion"];
+      const ones =   [       "",     "one",      "two",   "three",    "four",
+                         "five",     "six",    "seven",   "eight",    "nine"];
+      const teens =  [    "ten",  "eleven",   "twelve","thirteen","fourteen",
+                      "fifteen", "sixteen","seventeen","eighteen","nineteen"];
+      const tens =   [       "",        "",   "twenty",  "thirty",   "forty",
+                        "fifty",   "sixty",  "seventy",  "eighty",  "ninety"];
+      const scales = [       "","thousand",  "million", "billion","trillion"];
 
       function inWords(num) {
         let word = '';
@@ -111,27 +129,35 @@
       const eqn = document.getElementById('equation-input').value;
       let value;
       try { value = eval(eqn); }
-      catch (err) { document.getElementById('output').innerText = "Error: " + err; return; }
-      if (!Number.isFinite(value)) { document.getElementById('output').innerText = "Not a number."; return; }
+      catch (err) {
+        document.getElementById('output').innerText = "Error: " + err; return;
+      }
+      if (!Number.isFinite(value)) {
+        document.getElementById('output').innerText = "Not a number."; return;
+      }
       value = Math.floor(value);
 
       // Fetch Lembrent-60 and Lembrent-64 representations
-      const [l60, l64] = await Promise.all([lembrent(60, value), lembrent(64, value)]);
+      const [l60, l64] = await Promise.all(
+        [lembrent(60, value), lembrent(64, value)]
+      );
       document.getElementById('output').innerHTML =
         `<div class="equation-row">
           <b>Decimal:</b> <span>${sep(value)}</span><br>
-          <b>Lembrent-60:</b> <span class="glyph">${l60?.svg?.join("")||"?"}</span> <code>${l60?.name||"?"}</code><br>
-          <b>Lembrent-64:</b> <span class="glyph">${l64?.svg?.join("")||"?"}</span> <code>${l64?.name||"?"}</code>
+          <b>Lembrent-60:</b>
+          <span class="glyph">${l60?.svg?.join("")||"?"}</span>
+          <code>${l60?.name||"?"}</code><br>
+          <b>Lembrent-64:</b>
+          <span class="glyph">${l64?.svg?.join("")||"?"}</span>
+          <code>${l64?.name||"?"}</code>
         </div>`;
     };
 
-    // === Load sample numbers, as per your bash script ===
+    // === Load sample numbers ===
     async function loadSamples() {
-      // Numbers: 0..63
       let nums = [];
       for (let i=0; i<64; ++i) nums.push(i);
-      // All radial ranges in your bash
-      const powers = [1, 60, 3600, 216000, 12960000, 777600000, 1,64,4096,262144,16777216,1073741824];
+      const powers = [1]; for (let i = 1; i < 6; i++) powers.push(60**i, 64**i);
       for (const radix of [60,64])
         for (let e=0; e<=5; ++e) {
           const p = Math.pow(radix,e);
