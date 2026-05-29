@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -0.25 1 1" width="400" height="400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <path id="stem-60" d="M-0.03125,-0.25 C-0.0208333,-0.25 -0.0104167,0 0,0 C0.0104167,0 0.0208333,-0.25 0.03125,-0.25 L0.03125,-0.25 L-0.03125,-0.25Z"/><path id="arm-60" d="M0,0 C0.0416667,0.015625 0.0833333,0.046875 0.125,0.078125 C0.25,0.171875 0.375,0.265625 0.5,-4.51028e-17 L0.5,-3.38271e-17 C0.375,0.199219 0.25,0.128906 0.125,0.0585938 C0.0833333,0.0351562 0.0416667,0.0117188 0,0 Z"/>
+  </defs>
+  <g transform="translate(0.5,0.25) scale(1,-1)">
+    <use href="#stem-60" fill="black"/> <use href="#arm-60" fill="black" transform="rotate(180)"/> <use href="#arm-60" fill="black" transform="scale(-1,1) rotate(180)"/> <use href="#arm-60" fill="black" transform="scale(-1,1) rotate(90)"/> <use href="#arm-60" fill="black" transform="rotate(0)"/> <use href="#arm-60" fill="black" transform="scale(-1,1) rotate(0)"/>
+  </g>
+</svg>

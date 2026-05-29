@@ -9,3 +9,7 @@
 
 # Python
 **/.venv
+
+# Cache
+**/__pycache__/
+**/cache/

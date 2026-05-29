@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -0.25 1 1" width="400" height="400" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <path id="stem-64" d="M-0.015625,-0.25 C-0.0104167,-0.213542 -0.00520833,1.38778e-17 0,0 C0.00520833,0 0.0104167,-0.213542 0.015625,-0.25 L0.015625,-0.25 L-0.015625,-0.25Z"/><path id="arm-64" d="M0,0 C0.0416667,0.0572917 0.0833333,0.0677083 0.125,0.078125 C0.166667,0.0885417 0.208333,0.0989583 0.25,0.25 C0.291667,0.0989583 0.333333,0.0885417 0.375,0.078125 C0.416667,0.0677083 0.458333,0.0572917 0.5,0 L0.5,0 C0.458333,0.0429688 0.416667,0.0507812 0.375,0.0585938 C0.333333,0.0664063 0.291667,0.0742188 0.25,0.1875 C0.208333,0.0742188 0.166667,0.0664062 0.125,0.0585938 C0.0833333,0.0507812 0.0416667,0.0429688 0,0 Z"/>
+  </defs>
+  <g transform="translate(0.5,0.25) scale(1,-1)">
+    <use href="#stem-64" fill="black"/> <use href="#arm-64" fill="black" transform="rotate(180)"/> <use href="#arm-64" fill="black" transform="scale(-1,1) rotate(180)"/> <use href="#arm-64" fill="black" transform="rotate(90)"/> <use href="#arm-64" fill="black" transform="scale(-1,1) rotate(90)"/> <use href="#arm-64" fill="black" transform="rotate(0)"/> <use href="#arm-64" fill="black" transform="scale(-1,1) rotate(0)"/>
+  </g>
+</svg>
