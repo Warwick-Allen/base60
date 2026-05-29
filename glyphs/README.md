@@ -47,31 +47,38 @@ Scheme **60** forbids digits **60–63** (invalid in base 60).
 Render a digit (scheme 60, digit 12):
 
 ```bash
-glyphs --scheme 60 --digit 12 -o twelve.png
+glyphs --scheme 60 --digit 12 --png twelve.png
 ```
 
 Stem only (digit 0):
 
 ```bash
-glyphs --scheme 64 --digit 0 -o zero.png
+glyphs --scheme 64 --digit 0 --png zero.png
 ```
 
 Manual arms:
 
 ```bash
-glyphs --scheme 60 --placement 90+ --placement 90- -o manual.png
+glyphs --scheme 60 --placement 90+ --placement 90- --png manual.png
 ```
 
 Export exact SVG output with analytic cubic curves:
 
 ```bash
-glyphs --scheme 60 --digit 12 --svg -o twelve.svg
+glyphs --scheme 60 --digit 12 --svg twelve.svg
 ```
 
-A filename ending in `.svg` also selects SVG export automatically:
+You can request both formats in one call (repeatable options):
 
 ```bash
-glyphs --scheme 64 --digit 0 -o zero.svg
+glyphs --scheme 60 --digit 12 --png out.png --svg out.svg
+```
+
+Use `-` as the PATH to write to standard output, for example:
+
+```bash
+glyphs --scheme 60 --digit 12 --svg -    # write SVG to stdout
+glyphs --scheme 60 --digit 12 --png -    # write PNG bytes to stdout
 ```
 
 Generated SVG files use exact cubic Bezier path data and reuse repeated arm stroke geometry, so they are minimal and do not rasterize the glyph.
@@ -110,4 +117,4 @@ ruff check src tests
 
 ### WSL
 
-If no GUI backend is available, plots are saved automatically; see earlier notes on `python3-tk` or use `-o out.png`.
+If no GUI backend is available, plots are saved automatically; see earlier notes on `python3-tk` or use `--png out.png`.

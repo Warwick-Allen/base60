@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 from pathlib import Path
 from textwrap import dedent
+import sys
 
 from glyphs.glyph import Glyph
 from glyphs.placement import Placement
@@ -55,10 +56,20 @@ def glyph_to_svg(glyph: Glyph, size: int = 400) -> str:
     ).strip()
 
 
-def save_glyph_svg(glyph: Glyph, path: Path) -> Path:
-    """Write exact SVG for a glyph to disk."""
+def save_glyph_svg(glyph: Glyph, path: Path | str) -> Path | None:
+    """Write exact SVG for a glyph to disk or stdout.
+
+    If `path` is the string `"-"`, the SVG markup is written to standard
+    output and `None` is returned. Otherwise the file is written and the
+    resolved `Path` is returned.
+    """
     svg_text = glyph_to_svg(glyph)
-    target = path.expanduser().resolve()
+    if isinstance(path, str) and path == "-":
+        sys.stdout.write(svg_text)
+        sys.stdout.flush()
+        return None
+
+    target = Path(path).expanduser().resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(svg_text, encoding="utf-8")
     print(f"Wrote {target}")

@@ -13,7 +13,9 @@ from glyphs.glyph import Glyph
 from glyphs.placement import Placement
 from glyphs.plot import plot_glyph
 from glyphs.scheme import Scheme
-from glyphs.svg import save_glyph_svg
+from glyphs.svg import glyph_to_svg, save_glyph_svg
+import io
+import sys
 
 configure_matplotlib()
 import matplotlib.pyplot as plt  # noqa: E402
@@ -64,8 +66,10 @@ def main() -> None:
     )
     parser.add_argument(
         "--svg",
-        action="store_true",
-        help="Export the glyph as an exact SVG image instead of raster output",
+        action="append",
+        dest="svg",
+        metavar="PATH",
+        help="Save exact SVG to PATH; use '-' for stdout; repeatable",
     )
     parser.add_argument(
         "--clean",
@@ -73,23 +77,60 @@ def main() -> None:
         help="Hide axes and decorations; show only the glyph",
     )
     parser.add_argument(
-        "-o",
-        "--output",
-        type=Path,
+        "--png",
+        action="append",
+        dest="png",
         metavar="PATH",
-        help="Save the figure to PATH instead of opening a window",
+        help="Save PNG to PATH; use '-' for stdout; repeatable",
     )
     args = parser.parse_args()
 
     if args.scheme is not None:
         glyph = _build_glyph_from_args(args.scheme, args.digit, args.placements, args.force)
-        use_svg = args.svg or (args.output is not None and args.output.suffix.lower() == ".svg")
-        if use_svg:
-            output = args.output or Path("glyph.svg")
-            save_glyph_svg(glyph, output)
-        else:
+
+        png_paths = args.png or []
+        svg_paths = args.svg or []
+
+        # If no explicit outputs requested, preserve interactive/headless behaviour
+        if not png_paths and not svg_paths:
             plot_glyph(glyph, clean=args.clean)
-            show_or_save(args.output)
+            show_or_save(None)
+            return
+
+        # Generate SVG outputs first (they're text-based)
+        for p in svg_paths:
+            if p == "-":
+                # Write SVG to stdout
+                sys.stdout.write(glyph_to_svg(glyph))
+                sys.stdout.flush()
+            else:
+                save_glyph_svg(glyph, Path(p))
+
+        # Generate PNG outputs using the Matplotlib figure
+        if png_paths:
+            import matplotlib.pyplot as plt
+
+            ax = plot_glyph(glyph, clean=args.clean)
+            fig = ax.figure
+            for p in png_paths:
+                if p == "-":
+                    buf = io.BytesIO()
+                    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+                    buf.seek(0)
+                    # Write raw bytes to stdout buffer
+                    sys.stdout.buffer.write(buf.read())
+                    sys.stdout.buffer.flush()
+                else:
+                    target = Path(p).expanduser().resolve()
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    fig.savefig(target, dpi=150, bbox_inches="tight")
+                    plt.close(fig)
+                    print(f"Wrote {target}")
+            # Close the figure if not already closed
+            try:
+                plt.close(fig)
+            except Exception:
+                pass
     else:
         parser.print_help()
 
