@@ -1,288 +1,1410 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Lembrent-60 and Lembrent-64 Demonstration</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lembrent — Base-60 &amp; Base-64 Number System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Spectral:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+
   <style>
-    body              { font-family: sans-serif; }
-    .glyph            { display: inline-block; min-width: 2em;
-                        vertical-align: middle; }
-    .number-entry     { font-size: 1.2em; margin: 0.6em 0; }
-    .label            { font-weight: bold; }
-    .lembrent svg     { width: 10%; }
-    .equation td:nth-child(1) { width:  8em; text-align:  left; }
-    .equation td:nth-child(2) { width: auto; text-align: right; }
-    .equation td:nth-child(3) { width: 32em; text-align:  left; }
-    .lembrent.equation svg    { max-height: 2ex; }
-    table.samples     { border-collapse: collapse; margin-top: 1em; }
-    table.samples td,
-    table.samples th  { border: 1px solid #ddd; padding: 0.3em 0.6em;
-                        text-align: right; }
-    .equation
-    table.samples td  { border: 0; }
-    .equation
-    table.samples tr  { border-top: 1px solid #ddd; }
-    .equation
-    table.samples tr:nth-child(1)  { border-top: 0; }
-    .equation-row     { margin: 0.5em 0 1em 0; }
-    .glyph-svg        { width: 2em; height: 2em; vertical-align: middle; }
+    /* ── Tokens ──────────────────────────────────────────────── */
+    :root {
+      --ink:        #1a1410;
+      --paper:      #f5f0e8;
+      --cream:      #ede7d7;
+      --warm-mid:   #c8b89a;
+      --accent:     #8b3a1e;
+      --accent-lt:  #c4582d;
+      --gold:       #c49a2a;
+      --rule:       #d4c9b4;
+      --mono-bg:    #2a2218;
+      --mono-fg:    #e8dfc8;
+      --shadow:     rgba(26,20,16,.12);
+
+      --f-display:  'Playfair Display', Georgia, serif;
+      --f-body:     'Spectral', Georgia, serif;
+      --f-mono:     'DM Mono', 'Courier New', monospace;
+
+      --page-w:     72rem;
+      --section-gap: 5rem;
+    }
+
+    /* ── Reset & base ────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--f-body);
+      font-weight: 300;
+      font-size: 1.05rem;
+      line-height: 1.75;
+      color: var(--ink);
+      background: var(--paper);
+      background-image:
+        radial-gradient(ellipse at 70% 0%, rgba(196,154,42,.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 10% 90%, rgba(139,58,30,.06) 0%, transparent 55%);
+    }
+
+    /* ── Layout helpers ──────────────────────────────────────── */
+    .page-wrap  { max-width: var(--page-w); margin: 0 auto; padding: 0 2rem; }
+    .section    { padding: var(--section-gap) 0; border-top: 1px solid var(--rule); }
+    .section:first-of-type { border-top: none; }
+
+    /* ── Typography ──────────────────────────────────────────── */
+    h1, h2, h3, h4 { font-family: var(--f-display); font-weight: 400; line-height: 1.2; }
+
+    h1 { font-size: clamp(2.4rem, 5vw, 4rem); letter-spacing: -.02em; }
+    h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 1.2rem; }
+    h3 { font-size: 1.25rem; margin: 2rem 0 .6rem; }
+    h4 { font-size: 1rem; font-style: italic; margin: 1.4rem 0 .4rem; }
+
+    p        { margin-bottom: 1rem; } /* max-width: 68ch; */
+    p:last-child { margin-bottom: 0; }
+    strong   { font-weight: 500; }
+    em       { font-style: italic; }
+    a        { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .2s; }
+    a:hover  { border-color: var(--accent); }
+
+    code, .mono {
+      font-family: var(--f-mono);
+      font-size: .88em;
+      background: rgba(139,58,30,.08);
+      color: var(--accent);
+      padding: .1em .35em;
+      border-radius: 3px;
+    }
+
+    pre {
+      font-family: var(--f-mono);
+      font-size: .85rem;
+      background: var(--mono-bg);
+      color: var(--mono-fg);
+      padding: 1.4rem 1.8rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      line-height: 1.6;
+      margin: 1.2rem 0;
+    }
+    pre code { background: none; color: inherit; padding: 0; font-size: inherit; }
+
+    /* ── Masthead ─────────────────────────────────────────────── */
+    .masthead {
+      padding: 5rem 0 4rem;
+      border-bottom: 2px solid var(--ink);
+      position: relative;
+      overflow: hidden;
+    }
+    .masthead::before {
+      content: 'lembrent';
+      font-family: var(--f-display);
+      font-size: clamp(5rem, 14vw, 13rem);
+      font-weight: 700;
+      color: transparent;
+      -webkit-text-stroke: 1px var(--rule);
+      position: absolute;
+      right: -1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      letter-spacing: -.04em;
+      white-space: nowrap;
+    }
+    .masthead-kicker {
+      font-family: var(--f-mono);
+      font-size: .8rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    .masthead-sub {
+      font-size: 1.15rem;
+      font-style: italic;
+      color: #5a4e3e;
+      margin-top: 1rem;
+      max-width: 54ch;
+    }
+
+    /* ── Nav ─────────────────────────────────────────────────── */
+    nav {
+      background: var(--ink);
+      color: var(--paper);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px var(--shadow);
+    }
+    nav ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .1rem;
+      list-style: none;
+      max-width: var(--page-w);
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+    nav a {
+      display: block;
+      padding: .7rem .9rem;
+      font-family: var(--f-mono);
+      font-size: .78rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--warm-mid);
+      border-bottom: none;
+      transition: color .15s;
+    }
+    nav a:hover { color: var(--paper); }
+
+    /* ── Intro ───────────────────────────────────────────────── */
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+      margin-top: 1.5rem;
+    }
+    @media (max-width: 700px) { .intro-grid { grid-template-columns: 1fr; } }
+
+    /* ── Bit-map explainer ──────────────────────────────────── */
+    .bitmap-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--f-mono);
+      font-size: .88rem;
+    }
+    .bitmap-table th, .bitmap-table td {
+      border: 1px solid var(--rule);
+      padding: .45rem .75rem;
+      text-align: center;
+    }
+    .bitmap-table thead th {
+      background: var(--ink);
+      color: var(--paper);
+      font-weight: 400;
+      letter-spacing: .06em;
+    }
+    .bitmap-table tbody tr:nth-child(even) { background: var(--cream); }
+    .bit-val { color: var(--accent); font-weight: 500; }
+
+    /* ── Consonant highlight ──────────────────────────────────── */
+    .word-lembrent { font-family: var(--f-display); font-size: 1.8rem; letter-spacing: .05em; }
+    .word-lembrent .con { color: var(--accent); font-weight: 700; }
+    .word-lembrent .vow { color: var(--warm-mid); }
+
+    /* ── Digit template visual ──────────────────────────────── */
+    .template-box {
+      display: flex;
+      align-items: center;
+      gap: .15rem;
+      flex-wrap: wrap;
+      font-family: var(--f-mono);
+      font-size: 1.1rem;
+      background: var(--cream);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: .8rem 1.2rem;
+      margin: 1rem 0;
+    }
+    .template-box .slot {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .15rem;
+      min-width: 1.8rem;
+    }
+    .template-box .slot .char {
+      font-size: 1.3rem;
+      font-weight: 500;
+    }
+    .template-box .slot .lbl {
+      font-size: .62rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #7a6d5a;
+    }
+    .slot.con .char { color: var(--accent); }
+    .slot.vow .char { color: var(--warm-mid); }
+    .slot.opt .char { opacity: .35; }
+
+    /* ── Digit reference grid ────────────────────────────────── */
+    .digit-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+      gap: .5rem;
+      margin-top: 1rem;
+    }
+    .digit-card {
+      background: var(--cream);
+      border: 1px solid var(--rule);
+      border-radius: 5px;
+      padding: .5rem .7rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform .15s, box-shadow .15s;
+      cursor: default;
+    }
+    .digit-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 14px var(--shadow);
+    }
+    .digit-card .val {
+      font-family: var(--f-mono);
+      font-size: .75rem;
+      color: #7a6d5a;
+    }
+    .digit-card .name {
+      font-family: var(--f-mono);
+      font-size: .92rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+    .digit-card .glyph-wrap {
+      width: 2.4rem;
+      height: 2.4rem;
+      margin-top: .3rem;
+    }
+    .digit-card .glyph-wrap svg { width: 100%; height: 100%; }
+    .digit-card.b64-only { border-color: var(--gold); background: rgba(196,154,42,.06); }
+    .digit-card.b64-only .val { color: var(--gold); }
+
+    /* ── Pronunciation table ──────────────────────────────────── */
+    .pron-table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: .92rem;
+    }
+    .pron-table th, .pron-table td {
+      border: 1px solid var(--rule);
+      padding: .4rem .8rem;
+      text-align: left;
+    }
+    .pron-table thead th {
+      background: var(--ink);
+      color: var(--paper);
+      font-weight: 400;
+      font-family: var(--f-mono);
+      font-size: .8rem;
+      letter-spacing: .07em;
+    }
+    .pron-table tbody tr:nth-child(even) { background: var(--cream); }
+    .ipa { font-style: italic; color: #5a4e3e; }
+
+    /* ── Glyph explainer ────────────────────────────────────── */
+    .arm-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: .5rem;
+      margin: 1rem 0;
+    }
+    @media (max-width: 600px) { .arm-grid { grid-template-columns: repeat(3, 1fr); } }
+    .arm-cell {
+      background: var(--cream);
+      border: 1px solid var(--rule);
+      border-radius: 5px;
+      padding: .6rem;
+      text-align: center;
+    }
+    .arm-cell svg { width: 2.5rem; height: 2.5rem; }
+    .arm-cell .arm-lbl {
+      font-family: var(--f-mono);
+      font-size: .72rem;
+      color: #7a6d5a;
+      margin-top: .3rem;
+    }
+
+    /* ── Interactive calculator ─────────────────────────────── */
+    .calc-panel {
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-top: 1.5rem;
+    }
+    .calc-row {
+      display: flex;
+      gap: .8rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .calc-row label {
+      font-family: var(--f-mono);
+      font-size: .82rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--accent);
+      min-width: 6rem;
+    }
+    .calc-row input[type="text"],
+    .calc-row input[type="number"] {
+      font-family: var(--f-mono);
+      font-size: 1rem;
+      padding: .5rem .8rem;
+      border: 1px solid var(--warm-mid);
+      border-radius: 4px;
+      background: var(--paper);
+      color: var(--ink);
+      min-width: 14rem;
+      transition: border-color .15s;
+    }
+    .calc-row input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    button.primary {
+      font-family: var(--f-mono);
+      font-size: .85rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      background: var(--ink);
+      color: var(--paper);
+      border: none;
+      border-radius: 4px;
+      padding: .55rem 1.2rem;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    button.primary:hover { background: var(--accent); }
+
+    .result-block {
+      margin-top: 1.5rem;
+    }
+    .result-row {
+      display: grid;
+      grid-template-columns: 8rem 1fr;
+      gap: .5rem 1rem;
+      align-items: center;
+      padding: .7rem 0;
+      border-top: 1px solid var(--rule);
+    }
+    .result-row:first-child { border-top: none; }
+    .result-label {
+      font-family: var(--f-mono);
+      font-size: .78rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .result-value {
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: .5rem;
+      flex-wrap: wrap;
+    }
+    .result-value code { font-size: .95rem; }
+    .glyph-strip {
+      display: flex;
+      align-items: center;
+      gap: .2rem;
+      flex-wrap: wrap;
+    }
+    .glyph-strip svg { height: 2.2rem; width: auto; }
+    .glyph-strip .op-sym {
+      font-family: var(--f-mono);
+      font-size: 1rem;
+      color: var(--warm-mid);
+      padding: 0 .2rem;
+    }
+
+    /* ── Worked example ─────────────────────────────────────── */
+    .worked-step {
+      display: flex;
+      gap: 1rem;
+      margin: .8rem 0;
+      align-items: flex-start;
+    }
+    .worked-num {
+      flex-shrink: 0;
+      width: 1.8rem;
+      height: 1.8rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--paper);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--f-mono);
+      font-size: .8rem;
+      margin-top: .15rem;
+    }
+
+    /* ── Samples table ──────────────────────────────────────── */
+    .samples-wrap { overflow-x: auto; margin-top: 1.5rem; }
+    table.samples {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: .88rem;
+    }
+    table.samples th, table.samples td {
+      border: 1px solid var(--rule);
+      padding: .4rem .7rem;
+      text-align: right;
+      white-space: nowrap;
+    }
+    table.samples th {
+      background: var(--ink);
+      color: var(--paper);
+      font-family: var(--f-mono);
+      font-size: .76rem;
+      letter-spacing: .07em;
+      font-weight: 400;
+      text-align: center;
+    }
+    table.samples td:nth-child(2) { text-align: left; font-style: italic; }
+    table.samples td:nth-child(4),
+    table.samples td:nth-child(6) { font-family: var(--f-mono); color: var(--accent); text-align: left; }
+    table.samples td:nth-child(3),
+    table.samples td:nth-child(5) { text-align: center; }
+    table.samples tbody tr:nth-child(even) { background: var(--cream); }
+    table.samples .glyph-cell svg { height: 1.6rem; width: auto; vertical-align: middle; }
+
+    /* ── API section ────────────────────────────────────────── */
+    .endpoint-box {
+      background: var(--mono-bg);
+      color: var(--mono-fg);
+      border-radius: 6px;
+      padding: 1.2rem 1.8rem;
+      font-family: var(--f-mono);
+      font-size: .88rem;
+      line-height: 1.7;
+      margin: 1rem 0;
+    }
+    .endpoint-box .method { color: var(--gold); }
+    .endpoint-box .path   { color: #8ec8f0; }
+    .endpoint-box .param  { color: #b8e0a8; }
+    .endpoint-box .comment{ color: #7a7060; font-style: italic; }
+
+    /* ── Notice / callout ────────────────────────────────────── */
+    .callout {
+      border-left: 3px solid var(--accent);
+      padding: .8rem 1.2rem;
+      background: rgba(139,58,30,.06);
+      border-radius: 0 5px 5px 0;
+      margin: 1.2rem 0;
+    }
+    .callout.gold { border-color: var(--gold); background: rgba(196,154,42,.06); }
+
+    /* ── Footer ──────────────────────────────────────────────── */
+    footer {
+      border-top: 2px solid var(--ink);
+      padding: 2.5rem 0;
+      font-family: var(--f-mono);
+      font-size: .8rem;
+      color: var(--warm-mid);
+      text-align: center;
+    }
+    footer a { color: var(--warm-mid); border-bottom: 1px solid var(--rule); }
+
+    /* ── Spinner ─────────────────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 1em;
+      height: 1em;
+      border: 2px solid var(--rule);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Utilities ──────────────────────────────────────────── */
+    .muted   { color: #7a6d5a; font-style: italic; }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+    .tab-bar {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--ink);
+      margin-bottom: 1.5rem;
+    }
+    .tab-btn {
+      font-family: var(--f-mono);
+      font-size: .82rem;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      padding: .6rem 1.2rem;
+      background: none;
+      border: none;
+      color: var(--warm-mid);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: color .15s;
+    }
+    .tab-btn.active {
+      color: var(--ink);
+      border-bottom-color: var(--accent);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Scheme toggle ────────────────────────────────────────── */
+    .scheme-toggle {
+      display: flex;
+      gap: .3rem;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .scheme-btn {
+      font-family: var(--f-mono);
+      font-size: .82rem;
+      padding: .35rem .9rem;
+      border: 1px solid var(--ink);
+      border-radius: 3px;
+      background: var(--paper);
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .scheme-btn.active { background: var(--ink); color: var(--paper); }
+
+    /* ── Loading placeholder ────────────────────────────────── */
+    .load-placeholder {
+      color: var(--warm-mid);
+      font-style: italic;
+      font-size: .9rem;
+    }
   </style>
 </head>
 <body>
-  <h1>Lembrent-60 and Lembrent-64 Numbering Schemes</h1>
-  <p>
-    This page demonstrates <b>Lembrent-60</b> (base-60) and <b>Lembrent-64</b>
-    (base-64) numbering schemes.
-    These systems assign each digit a unique glyph and a name, constructed from
-    consonant bits ("l", "m", "b", "r", "n", "t") and vowels as per the
-    <a href="https://github.com/Warwick-Allen/base60" target="_blank"
-    >base60 project</a>.
-    The schemes use glyphs with arms encoded as a 6-bit bitmap, and names
-    constructed consistently from bit values (see <tt>lembrent/lembrent</tt>
-    for details).
-    For every integer, the notation is available in decimal, Lembrent-60 (using
-    an <em>s</em> prefix), and Lembrent-64 (using a <em>k</em> prefix).
-  </p>
 
-  <hr>
+<!-- ═══════════════════════ MASTHEAD ═══════════════════════════ -->
+<div class="masthead">
+  <div class="page-wrap">
+    <p class="masthead-kicker">Base-60 &amp; Base-64 Numeration</p>
+    <h1>Lembrent</h1>
+    <p class="masthead-sub">
+      A positional, phonetically encoded number system in which every digit carries
+      its value within its name and its glyph.
+    </p>
+  </div>
+</div>
 
-  <h2>Try an Equation</h2>
-  <form id="equation-form">
-    <label for="equation-input" class="label">Enter a simple equation:</label>
-    <input id="equation-input" type="text" value="123 + 456 * 2" size="30"
-           autocomplete="off">
-    <button type="submit">Calculate</button>
-  </form>
-  <div class="lembrent equation" id="output"></div>
+<!-- ═══════════════════════ NAV ════════════════════════════════ -->
+<nav aria-label="Page sections">
+  <ul>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#naming">Naming Scheme</a></li>
+    <li><a href="#glyphs-section">Glyphs</a></li>
+    <li><a href="#pronunciation">Pronunciation</a></li>
+    <li><a href="#calculator">Calculator</a></li>
+    <li><a href="#samples">Sample Numbers</a></li>
+    <li><a href="#api">API</a></li>
+    <li><a href="#installation">Installation</a></li>
+  </ul>
+</nav>
 
-  <hr>
+<div class="page-wrap">
 
-  <h2>Sample Numbers</h2>
-  <p>
-    The following table shows various numbers in decimal, their English wording,
-    Lembrent-60 and Lembrent-64 glyphs and names.
-  </p>
-  <table class="lembrent samples" id="samples-table">
-    <thead>
-      <tr>
-        <th>Decimal</th>
-        <th>In Words</th>
-        <th>Lembrent-60 Number</th>
-        <th>Lembrent-60 Name</th>
-        <th>Lembrent-64 Number</th>
-        <th>Lembrent-64 Name</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <!-- ═══════════════════════ OVERVIEW ═══════════════════════ -->
+  <section class="section" id="overview">
+    <h2>Overview</h2>
+    <div class="intro-grid">
+      <div>
+        <p>
+          <strong>Lembrent</strong> is a system for naming and drawing
+          base&#8209;60 (<strong>Lembrent&#8209;60</strong>) and base&#8209;64
+          (<strong>Lembrent&#8209;64</strong>) numbers.  The scheme is designed
+          so that the value of any digit can be computed directly from the
+          consonants present in its spoken name, making it simultaneously
+          human-pronounceable and algorithmically unambiguous.
+        </p>
+        <p>
+          The word <strong>"lembrent"</strong> itself encodes the entire
+          scheme: its six consonants each carry a unique, fixed bit value,
+          and its two vowels (<em>e</em>) serve purely as phonetic scaffolding.
+        </p>
+        <p>
+          Lembrent&#8209;60 uses digits 0–59; Lembrent&#8209;64 extends the
+          same system to digits 0–63, adding four further values.
+          Both share an identical naming and glyph construction rule.
+        </p>
+      </div>
+      <div>
+        <p style="margin-bottom:.8rem;">
+          The word <em>lembrent</em> as it encodes the scheme:
+        </p>
+        <div class="word-lembrent">
+          <span class="con">l</span><span class="vow">e</span><span class="con">m</span><span class="con">b</span><span class="con">r</span><span class="vow">e</span><span class="con">n</span><span class="con">t</span>
+        </div>
+        <p style="margin-top:.8rem;font-size:.88rem;color:#5a4e3e;">
+          <span style="color:var(--accent);">■</span> Consonants — each carries a bit value &nbsp;
+          <span style="color:var(--warm-mid);">■</span> Vowels — phonetic scaffolding only
+        </p>
 
-  <script>
-    // Updated: Helper - number to English words for arbitrarily large integers
-    function numToWords(n) {
-      if (n === 0) return 'zero';
-      const ones =   [       "",     "one",      "two",   "three",    "four",
-                         "five",     "six",    "seven",   "eight",    "nine"];
-      const teens =  [    "ten",  "eleven",   "twelve","thirteen","fourteen",
-                      "fifteen", "sixteen","seventeen","eighteen","nineteen"];
-      const tens =   [       "",        "",   "twenty",  "thirty",   "forty",
-                        "fifty",   "sixty",  "seventy",  "eighty",  "ninety"];
-      const scales = [       "","thousand",  "million", "billion","trillion"];
-
-      function inWords(num) {
-        let word = '';
-        if (num >= 100) {
-          word += ones[Math.floor(num / 100)] + " hundred";
-          num %= 100;
-          if (num) word += " and ";
-        }
-        if (num >= 20) {
-          word += tens[Math.floor(num / 10)];
-          num %= 10;
-          if (num) word += "-" + ones[num];
-        } else if (num >= 10) {
-          word += teens[num - 10];
-        } else if (num > 0) {
-          word += ones[num];
-        }
-        return word;
-      }
-
-      let result = "";
-      let scale = 0;
-      while (n > 0) {
-        let chunk = n % 1000;
-        if (chunk) {
-          let chunkWords = inWords(chunk);
-          if (scales[scale]) chunkWords += " " + scales[scale];
-          result = chunkWords + (result ? ", " : "") + result;
-        }
-        n = Math.floor(n / 1000);
-        scale += 1;
-      }
-      return result.trim();
-    }
-
-    function sep(x) { return x.toLocaleString(); }
-
-    // === Helper: Fetch Lembrent number info from API ===
-    async function lembrent(radix, number) {
-      const url = `/lembrent/${radix}/${number}?name=1&svg=1&png=0`;
-      const resp = await fetch(url);
-      if (!resp.ok) return null;
-      const data = await resp.json();
-      return data;
-    }
-
-    // Tokenizes an equation string, preserving numbers, ops, and whitespace/punctuation
-    function tokenizeEquation(eqn) {
-      const re = /(\d+|\+|-|\*|\/|\^|\(|\))/g;
-      let res = [];
-      let lastIndex = 0;
-      let m;
-      while ((m = re.exec(eqn)) !== null) {
-        if (m.index > lastIndex) {
-          res.push({ type: 'raw', value: eqn.slice(lastIndex, m.index) });
-        }
-        const v = m[0];
-        if (/^\d+$/.test(v))
-          res.push({ type: 'number', value: v });
-        else
-          res.push({ type: 'op', value: v });
-        lastIndex = re.lastIndex;
-      }
-      if (lastIndex < eqn.length) {
-        res.push({ type: 'raw', value: eqn.slice(lastIndex) });
-      }
-      return res;
-    }
-
-    // For names/words, map operators to word equivalents
-    const OP_WORDS = {
-      '+': 'plus',
-      '-': 'minus',
-      '*': 'times',
-      '/': 'divided by',
-      '^': 'to the power of',
-      '(': 'open paren',
-      ')': 'close paren',
-      '=': 'equals'
-    };
-
-    // === Handle equation form ===
-    document.getElementById('equation-form').onsubmit = async function (e) {
-      e.preventDefault();
-      const eqn = document.getElementById('equation-input').value;
-      let value;
-      try { value = eval(eqn); }
-      catch (err) {
-        document.getElementById('output').innerText = "Error: " + err; return;
-      }
-      if (!Number.isFinite(value)) {
-        document.getElementById('output').innerText = "Not a number."; return;
-      }
-      value = Math.floor(value);
-
-      // Tokenize equation
-      const tokens = tokenizeEquation(eqn);
-
-      // Unique numbers to process (all in equation, plus the answer)
-      let numbers = tokens.filter(t => t.type === 'number').map(t => t.value);
-      numbers.push(String(value));
-      numbers = Array.from(new Set(numbers));
-
-      // Fetch Lembrent representations for all numbers
-      let l60s = {}, l64s = {};
-      await Promise.all(numbers.map(async n => {
-        [l60s[n], l64s[n]] = await Promise.all([lembrent(60, n), lembrent(64, n)]);
-      }));
-
-      // Helper: convert tokens to pretty output (for different columns)
-      function tokensToString(tokens, forColumn) {
-        // forColumn: "decimal", "words", "l60glyph", "l60name", "l64glyph", "l64name"
-        return tokens.map(t => {
-          if (t.type === 'number') {
-            if (forColumn === "decimal") return sep(Number(t.value));
-            if (forColumn === "words") return numToWords(Number(t.value));
-            if (forColumn === "l60glyph") return l60s[t.value]?.svg?.join("") || "?";
-            if (forColumn === "l60name") return l60s[t.value]?.name || "?";
-            if (forColumn === "l64glyph") return l64s[t.value]?.svg?.join("") || "?";
-            if (forColumn === "l64name") return l64s[t.value]?.name || "?";
-          }
-          if (t.type === 'op') {
-            if (forColumn === "decimal" || forColumn === "l60glyph" || forColumn === "l64glyph") return t.value;
-            // otherwise (names/words)
-            return OP_WORDS[t.value] || t.value;
-          }
-          // treat whitespace/raw as-is
-          return t.value;
-        }).join('');
-      }
-
-      // Construct rows for the table
-      // Eq string: ... = <answer>
-
-      let decEq    = tokensToString(tokens, "decimal") + ' = ' + sep(value);
-      let decWords = tokensToString(tokens, "words")   + ' equals ' + numToWords(value);
-
-      let l60Glyph = tokensToString(tokens, "l60glyph") + ' = ' + (l60s[String(value)]?.svg?.join("") || "?");
-      let l60Name  = tokensToString(tokens, "l60name")  + ' equals ' + (l60s[String(value)]?.name || "?");
-
-      let l64Glyph = tokensToString(tokens, "l64glyph") + ' = ' + (l64s[String(value)]?.svg?.join("") || "?");
-      let l64Name  = tokensToString(tokens, "l64name")  + ' equals ' + (l64s[String(value)]?.name || "?");
-
-      // Put in output table
-      document.getElementById('output').innerHTML =
-        `<table class="lembrent samples">
+        <table class="bitmap-table" style="margin-top:1rem;">
+          <thead>
+            <tr>
+              <th>Consonant</th>
+              <th>Bit</th>
+              <th>Decimal value</th>
+            </tr>
+          </thead>
           <tbody>
-          <tr>
-            <td><b>Decimal</b></td>
-            <td>${decEq}</td>
-            <td>${decWords}</td>
-          </tr>
-          <tr>
-            <td><b>Lembrent-60</b></td>
-            <td class="glyph">${l60Glyph}</td>
-            <td>${l60Name}</td>
-          </tr>
-          <tr>
-            <td><b>Lembrent-64</b></td>
-            <td class="glyph">${l64Glyph}</td>
-            <td>${l64Name}</code></td>
-          </tr>
+            <tr><td><code>l</code></td><td>2⁵</td><td class="bit-val">32</td></tr>
+            <tr><td><code>m</code></td><td>2⁴</td><td class="bit-val">16</td></tr>
+            <tr><td><code>b</code></td><td>2³</td><td class="bit-val">8</td></tr>
+            <tr><td><code>r</code></td><td>2²</td><td class="bit-val">4</td></tr>
+            <tr><td><code>n</code></td><td>2¹</td><td class="bit-val">2</td></tr>
+            <tr><td><code>t</code></td><td>2⁰</td><td class="bit-val">1</td></tr>
           </tbody>
-         </table>`;
-    };
+        </table>
+        <p style="margin-top:.8rem;font-size:.85rem;" class="muted">
+          The value of a digit is the sum of the bit values of all consonants present in its name.
+          These six bits span values 0–63, naturally supporting bases up to 64.
+        </p>
+      </div>
+    </div>
+  </section>
 
-    // === Load sample numbers ===
-    async function loadSamples() {
-      let nums = [];
-      for (let i=0; i<64; ++i) nums.push(i);
-      const powers = [1]; for (let i = 1; i < 6; i++) powers.push(60**i, 64**i);
-      for (const radix of [60,64])
-        for (let e=0; e<=5; ++e) {
-          const p = Math.pow(radix,e);
-          for (let d=-2; d<=2; ++d) {
-            let n = Math.floor(Math.pow(p, 1.0045**d));
-            nums.push(n);
-          }
-        }
-      nums = [...new Set(nums)].sort((a,b)=>a-b).filter(n=>n>=0 && n<1e9);
+  <!-- ═══════════════════════ NAMING SCHEME ══════════════════ -->
+  <section class="section" id="naming">
+    <h2>The Lembrent Naming Scheme</h2>
 
-      const tbody = document.getElementById('samples-table').querySelector('tbody');
-      for (const n of nums.slice(0,90)) { // Cap to first ~90 numbers for demo table
-        const [l60,l64] = await Promise.all([lembrent(60, n), lembrent(64, n)]);
-        const row = document.createElement('tr');
-        row.innerHTML =
-          `<td>${sep(n)}</td>
-           <td>${numToWords(n)}</td>
-           <td class="glyph">${l60?.svg?.join("")||"?"}</td>
-           <td><code>${l60?.name||"?"}</code></td>
-           <td class="glyph">${l64?.svg?.join("")||"?"}</td>
-           <td><code>${l64?.name||"?"}</code></td>`;
-        tbody.appendChild(row);
+    <h3>Digit Structure</h3>
+    <p>
+      Every digit follows a strict template derived from the word
+      <em>lembrent</em>.  The two vowels are fixed positional markers; each
+      consonant is either included (its bit is set) or omitted (its bit is clear).
+      Consonants always appear in the fixed order
+      <code>l</code>, <code>m</code>, <code>b</code>, <code>r</code>,
+      <code>n</code>, <code>t</code>.
+    </p>
+
+    <div class="template-box">
+      <div class="slot opt con"><span class="char">l</span><span class="lbl">bit 5 (32)</span></div>
+      <div class="slot vow"><span class="char">e</span><span class="lbl">fixed</span></div>
+      <div class="slot opt con"><span class="char">m</span><span class="lbl">bit 4 (16)</span></div>
+      <div class="slot opt con"><span class="char">b</span><span class="lbl">bit 3 (8)</span></div>
+      <div class="slot opt con"><span class="char">r</span><span class="lbl">bit 2 (4)</span></div>
+      <div class="slot vow"><span class="char">e</span><span class="lbl">fixed</span></div>
+      <div class="slot opt con"><span class="char">n</span><span class="lbl">bit 1 (2)</span></div>
+      <div class="slot opt con"><span class="char">t</span><span class="lbl">bit 0 (1)</span></div>
+    </div>
+
+    <div class="callout">
+      <strong>Example:</strong> <code>emrent</code> has value
+      2⁴ + 2² + 2¹ + 2⁰ = 16 + 4 + 2 + 1 = <strong>23</strong>.
+      It contains <code>m</code>, <code>r</code>, <code>n</code>, and
+      <code>t</code>, but not <code>l</code> or <code>b</code>.
+    </div>
+    <div class="callout">
+      <strong>Zero:</strong> A digit with value zero is written <code>ee</code>
+      — the two vowels with no consonants present.
+    </div>
+
+    <h3>Multi-Digit Numbers: Length Digits and Significant Digits</h3>
+    <p>
+      A full Lembrent number name is composed of two parts:
+    </p>
+    <ol style="margin: .5rem 0 1rem 1.5rem; line-height:1.9;">
+      <li>
+        <strong>A length digit</strong> — a single Lembrent digit, prefixed
+        with a base indicator, encoding how many significant digits follow.
+      </li>
+      <li>
+        <strong>The significant digits</strong> — the actual base-60 or
+        base-64 digits of the number, each prefixed with a hyphen (<code>-</code>).
+      </li>
+    </ol>
+
+    <p>The base indicator prefix is <code>s</code> for base&#8209;60 and <code>k</code> for base&#8209;64.</p>
+
+    <div class="endpoint-box" style="font-size:.9rem;">
+      <span class="path">&lt;base-prefix&gt;&lt;length-digit&gt;-&lt;digit₁&gt;-&lt;digit₂&gt;-…-&lt;digitₙ&gt;</span><br>
+      <span class="comment">where digit₁ is the most significant and digitₙ is the units digit</span>
+    </div>
+
+    <div class="callout gold">
+      <p>
+        <strong>Single-digit numbers:</strong>
+        For numbers below 64 (a single significant digit), the length digit is optional.
+        Such a number may be written in full multi-digit form or as a bare digit name.
+      </p>
+      <p>
+        <strong>Zero number:</strong>
+        The number zero may be written in any of the following ways:<br>
+        – `see` (Lembrent-60: a zero length digit with no significant digits)<br>
+        – `kee` (Lembrent-64: a zero length digit with no significant digits)<br>
+        – `ee` (bare zero digit, base-agnostic)
+      </p>
+    </div>
+
+    <h3>Step-by-Step Worked Example — 70 in Lembrent&#8209;60</h3>
+
+    <div class="worked-step">
+      <div class="worked-num">1</div>
+      <div>
+        <strong>Convert to base&#8209;60.</strong>
+        70 ÷ 60 = 1 remainder 10.
+        So the digits are <strong>1</strong> (60¹ place) and <strong>10</strong> (60⁰ place).
+      </div>
+    </div>
+    <div class="worked-step">
+      <div class="worked-num">2</div>
+      <div>
+        <strong>Name each significant digit.</strong>
+        Digit 1 = <code>eet</code> (bit 0 only → 2⁰ = 1).
+        Digit 10 = <code>eben</code> (bits 3 and 1 → 2³ + 2¹ = 8 + 2 = 10).
+      </div>
+    </div>
+    <div class="worked-step">
+      <div class="worked-num">3</div>
+      <div>
+        <strong>Determine the length digit.</strong>
+        Two significant digits → length value = 2 → <code>een</code> (bit 1 → 2¹ = 2).
+      </div>
+    </div>
+    <div class="worked-step">
+      <div class="worked-num">4</div>
+      <div>
+        <strong>Assemble.</strong>
+        Base&#8209;60 prefix <code>s</code> + length digit <code>een</code>
+        + <code>-eet</code> + <code>-eben</code> =
+        <code>seen-eet-eben</code>.
+      </div>
+    </div>
+
+    <h3>Complete Digit Reference (0–63)</h3>
+    <p>
+      Values 60–63 are valid only in Lembrent&#8209;64.
+    </p>
+    <div id="digit-ref-grid" class="digit-grid">
+      <span class="load-placeholder"><span class="spinner"></span> Loading glyphs…</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ GLYPHS ═════════════════════════ -->
+  <section class="section" id="glyphs-section">
+    <h2>Glyphs</h2>
+    <p>
+      Each Lembrent glyph consists of a <strong>stem stroke</strong> plus zero
+      to six <strong>arm strokes</strong>.  The arms are encoded as a 6-bit
+      bitmap — the same bitmap used in the digit's spoken name — so the glyph
+      and name are two representations of the same underlying data structure.
+    </p>
+
+    <div class="two-col">
+      <div>
+        <h3>Coordinate Frame</h3>
+        <p>The canvas runs from (−0.5, −0.5) to (0.5, 0.5).  The stem tip
+        sits at (0, 0); the canonical arm (before rotation) extends toward
+        (0.5, 0).</p>
+
+        <h3>Arm Bit Encoding</h3>
+        <table class="bitmap-table" style="margin-top:.5rem;">
+          <thead>
+            <tr><th>Bit</th><th>Sign</th><th>Rotation</th><th>Tip position</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>0 (LSB)</td><td>+</td><td>π</td><td>(−0.5, 0) left</td></tr>
+            <tr><td>1</td><td>−</td><td>π</td><td>(−0.5, 0)</td></tr>
+            <tr><td>2</td><td>+</td><td>π/2</td><td>(0, 0.5) above</td></tr>
+            <tr><td>3</td><td>−</td><td>π/2</td><td>(0, 0.5)</td></tr>
+            <tr><td>4</td><td>+</td><td>0</td><td>(0.5, 0) right</td></tr>
+            <tr><td>5 (MSB)</td><td>−</td><td>0</td><td>(0.5, 0)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Arm Placements</h3>
+        <p>
+          Placement tokens: <code>180+</code>, <code>180-</code>,
+          <code>90+</code>, <code>90-</code>, <code>0+</code>, <code>0-</code>.
+        </p>
+        <div class="callout">
+          Scheme&#8209;60 forbids digits 60–63 (invalid in base&#8209;60).
+        </div>
+        <h3>SVG Output</h3>
+        <p>
+          Generated SVG files use exact cubic Bézier path data and reuse
+          repeated arm-stroke geometry, so they are minimal and do not
+          rasterise the glyph.
+        </p>
+        <p>
+          The glyphs toolkit is built on
+          <a href="https://numpy.org/" target="_blank">NumPy</a> and
+          <a href="https://matplotlib.org/" target="_blank">Matplotlib</a>
+          (Python 3.10+).
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ PRONUNCIATION ══════════════════ -->
+  <section class="section" id="pronunciation">
+    <h2>Pronunciation</h2>
+    <p>
+      Each letter has a single, consistent pronunciation regardless of its
+      position.  The sole exception is the vowel <em>e</em>, which changes
+      between its doubled form (<code>ee</code>) and its single form
+      (<code>e</code>).
+    </p>
+
+    <div class="two-col">
+      <div>
+        <h3>Letter Sounds</h3>
+        <table class="pron-table">
+          <thead>
+            <tr><th>Letter(s)</th><th>IPA</th><th>Approx. sound</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>ee</code></td><td class="ipa">/ɪə/</td><td>As in <em>here</em>, <em>ear</em></td></tr>
+            <tr><td><code>e</code></td><td class="ipa">/ɛ/</td><td>As in <em>bed</em>, <em>set</em></td></tr>
+            <tr><td><code>b</code></td><td class="ipa">/b/</td><td>As in <em>bed</em></td></tr>
+            <tr><td><code>k</code></td><td class="ipa">/k/</td><td>As in <em>key</em></td></tr>
+            <tr><td><code>l</code></td><td class="ipa">/l/</td><td>As in <em>leg</em></td></tr>
+            <tr><td><code>m</code></td><td class="ipa">/m/</td><td>As in <em>map</em></td></tr>
+            <tr><td><code>n</code></td><td class="ipa">/n/</td><td>As in <em>net</em></td></tr>
+            <tr><td><code>r</code></td><td class="ipa">/r/</td><td>As in <em>run</em></td></tr>
+            <tr><td><code>t</code></td><td class="ipa">/t/</td><td>As in <em>top</em></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Syllable Structure</h3>
+        <p>
+          If at least one consonant is present between the two <code>e</code>s
+          (<code>m</code>, <code>b</code>, or <code>r</code>), there is a
+          syllable break between the vowels — immediately after <code>m</code>,
+          or after the initial <code>e</code> if no <code>m</code> is present.
+          Otherwise the digit is monosyllabic.
+        </p>
+        <table class="pron-table" style="margin-top:.8rem;">
+          <thead>
+            <tr><th>Digit</th><th>Value</th><th>Syllabification</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>ee</code></td><td>0</td><td class="ipa">/ɪə/</td></tr>
+            <tr><td><code>leent</code></td><td>35</td><td class="ipa">/lɪənt/</td></tr>
+            <tr><td><code>eme</code></td><td>16</td><td class="ipa">/ɛm ɛ/</td></tr>
+            <tr><td><code>lembrent</code></td><td>63</td><td class="ipa">/lɛm brɛnt/</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3>Clarity, Tolerance, and Consonant Clusters</h3>
+    <div class="callout">
+      <strong>Clarity:</strong> Because every consonant is semantically
+      significant and the scheme contains no phonetic redundancy, every
+      consonant must be clearly and distinctly enunciated.  Speakers who
+      habitually soften or drop final consonants — in particular, final
+      <code>t</code> — must take especial care.
+    </div>
+    <div class="callout">
+      <strong>Consonant clusters:</strong> Speakers who find clusters
+      such as <code>br</code> difficult may insert a schwa (/ə/) to separate
+      them; the syllable bearing the schwa is unstressed.  For example,
+      <code>lembrent</code> may be pronounced as /lɛm brɛnt/ or as
+      /'lɛm bə 'rɛnt/.
+    </div>
+    <div class="callout gold">
+      <strong>Vowel and consonant tolerance:</strong> Because vowels carry no
+      semantic weight, slight variation is tolerated.  The fixed positional
+      ordering of consonants also makes the scheme resistant to certain
+      mispronunciations: a speaker who renders <code>r</code> as /l/ or
+      <code>t</code> as /d/ can still be understood from the consonant's
+      position alone.
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ CALCULATOR ═════════════════════ -->
+  <section class="section" id="calculator">
+    <h2>Interactive Calculator</h2>
+    <p>
+      Enter any non-negative integer or arithmetic expression to see its
+      representation in both Lembrent&#8209;60 and Lembrent&#8209;64.
+      The glyphs and Lembrent names are returned live from the API.
+    </p>
+
+    <div class="calc-panel">
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="expression">Expression</button>
+        <button class="tab-btn" data-tab="number">Single Number</button>
+      </div>
+
+      <!-- Expression tab -->
+      <div class="tab-panel active" id="tab-expression">
+        <div class="calc-row">
+          <label for="eqn-input">Expression</label>
+          <input type="text" id="eqn-input" value="123 + 456 * 2" autocomplete="off">
+          <button class="primary" id="calc-eqn-btn">Calculate</button>
+        </div>
+        <p style="font-size:.82rem;color:#7a6d5a;margin-top:.5rem;margin-left:6.8rem;">
+          Arithmetic operators +, −, *, /, and parentheses are supported.
+          Only non-negative integer results are displayed.
+        </p>
+      </div>
+
+      <!-- Single number tab -->
+      <div class="tab-panel" id="tab-number">
+        <div class="calc-row">
+          <label for="num-input">Number</label>
+          <input type="number" id="num-input" value="70" min="0" step="1" autocomplete="off">
+          <button class="primary" id="calc-num-btn">Convert</button>
+        </div>
+      </div>
+
+      <div class="result-block" id="calc-result" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ SAMPLES ════════════════════════ -->
+  <section class="section" id="samples">
+    <h2>Sample Numbers</h2>
+    <p>
+      The following table shows a curated selection of numbers in decimal,
+      their English names, and their Lembrent&#8209;60 and Lembrent&#8209;64
+      glyphs and spoken names.
+    </p>
+
+    <div class="scheme-toggle">
+      <span style="font-family:var(--f-mono);font-size:.8rem;color:#7a6d5a;margin-right:.5rem;">Show glyphs for:</span>
+      <button class="scheme-btn active" data-scheme="60">Lembrent-60</button>
+      <button class="scheme-btn" data-scheme="64">Lembrent-64</button>
+      <button class="scheme-btn active" id="both-btn" style="display:none;" data-scheme="both">Both</button>
+    </div>
+
+    <div class="samples-wrap">
+      <table class="samples" id="samples-table">
+        <thead>
+          <tr>
+            <th>Decimal</th>
+            <th>In Words</th>
+            <th>Lembrent-60 Glyph</th>
+            <th>Lembrent-60 Name</th>
+            <th>Lembrent-64 Glyph</th>
+            <th>Lembrent-64 Name</th>
+          </tr>
+        </thead>
+        <tbody id="samples-tbody">
+          <tr><td colspan="6" class="load-placeholder" style="text-align:center;padding:1rem;">
+            <span class="spinner"></span> Loading samples…
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ API ════════════════════════════ -->
+  <section class="section" id="api">
+    <h2>REST API</h2>
+    <p>
+      The Lembrent + Glyphs API is a small FastAPI application that exposes a
+      single endpoint, returning the Lembrent name and per-digit SVG glyphs for
+      any non-negative integer in either base.
+    </p>
+
+    <div class="endpoint-box">
+      <span class="method">GET</span>
+      <span class="path"> /lembrent/{radix}/{number}</span><br><br>
+      <span class="comment">Query parameters (defaults):</span><br>
+      <span class="param">  name</span>=1  <span class="comment">  include the Lembrent name string</span><br>
+      <span class="param">  svg</span>=1   <span class="comment">  include per-digit SVG strings</span><br>
+      <span class="param">  png</span>=0   <span class="comment">  include per-digit PNGs as base64</span>
+    </div>
+
+    <h3>Example Requests</h3>
+    <pre><code>curl -s "http://127.0.0.1:8000/lembrent/60/70?name=1&amp;svg=1&amp;png=0"
+curl -s "http://127.0.0.1:8000/lembrent/64/12?name=1&amp;svg=1&amp;png=1" | jq .</code></pre>
+
+    <h3>Caching</h3>
+    <p>
+      The API maintains an in-memory LRU cache (configurable via
+      <code>MAX_CACHE_ENTRIES</code>) and optionally a disk cache stored under
+      <code>api/cache/{cache_version}</code> (configurable via
+      <code>DISK_CACHE_DIR</code>).
+    </p>
+
+    <h3>Live Query</h3>
+    <p>Try the API directly from this page:</p>
+    <div class="calc-panel" style="margin-top:1rem;">
+      <div class="calc-row">
+        <label for="api-radix">Base</label>
+        <select id="api-radix" style="font-family:var(--f-mono);padding:.5rem .8rem;border:1px solid var(--warm-mid);border-radius:4px;background:var(--paper);">
+          <option value="60">60</option>
+          <option value="64">64</option>
+        </select>
+        <label for="api-number">Number</label>
+        <input type="number" id="api-number" value="70" min="0" step="1" style="min-width:8rem;">
+        <button class="primary" id="api-query-btn">Query API</button>
+      </div>
+      <pre id="api-result" style="margin-top:1rem;display:none;"></pre>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════ INSTALLATION ═══════════════════ -->
+  <section class="section" id="installation">
+    <h2>Installation</h2>
+    <div class="two-col">
+      <div>
+        <h3>lembrent (Perl CLI)</h3>
+        <p>
+          The <code>lembrent</code> command-line utility converts non-negative
+          integers to their Lembrent&#8209;60 or Lembrent&#8209;64 spoken names.
+          It requires only Perl 5 — no non-core modules.
+        </p>
+        <pre><code>git clone https://github.com/Warwick-Allen/base60.git
+cd base60/lembrent
+chmod +x lembrent
+./lembrent 60 70
+<span style="color:var(--gold);"># seen-eet-eben</span></code></pre>
+        <p>To place it on your <code>PATH</code>:</p>
+        <pre><code>sudo cp lembrent /usr/local/bin/lembrent</code></pre>
+
+        <h4>Synopsis</h4>
+        <pre><code>lembrent BASE [NUMBER...]</code></pre>
+        <p>
+          <code>BASE</code> must be <code>60</code> or <code>64</code>.
+          Shell arithmetic expressions are accepted as
+          <code>NUMBER</code> arguments.
+        </p>
+      </div>
+      <div>
+        <h3>glyphs (Python toolkit)</h3>
+        <p>
+          The <code>glyphs</code> toolkit renders Lembrent glyphs as SVG or
+          PNG.  It requires Python 3.10+ and uses NumPy and Matplotlib.
+        </p>
+        <pre><code>cd base60
+python -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"</code></pre>
+        <h4>CLI usage</h4>
+        <pre><code><span style="color:var(--gold);"># SVG output (digit 12, scheme 60)</span>
+glyphs --scheme 60 --digit 12 --svg twelve.svg
+
+<span style="color:var(--gold);"># PNG output</span>
+glyphs --scheme 60 --digit 12 --png twelve.png
+
+<span style="color:var(--gold);"># Manual arm placement</span>
+glyphs --scheme 60 --placement 90+ --placement 90- --png m.png
+
+<span style="color:var(--gold);"># Write SVG to stdout</span>
+glyphs --scheme 60 --digit 12 --svg -</code></pre>
+        <h4>Python API</h4>
+        <pre><code>from glyphs import Scheme, glyph_for_digit, plot_glyph
+glyph = glyph_for_digit(Scheme.S60, 12)
+plot_glyph(glyph)</code></pre>
+
+        <h3>API server</h3>
+        <pre><code>pip install -r api/requirements.txt
+uvicorn api.app:app --reload --port 8000</code></pre>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page-wrap -->
+
+<!-- ═══════════════════════ FOOTER ════════════════════════════ -->
+<footer>
+  <p>
+    Lembrent is released under the
+    <a href="https://github.com/Warwick-Allen/base60/blob/main/LICENCE" target="_blank">MIT Licence</a>.
+    Copyright &copy; 2026 Warwick Allen. &ensp;
+    <a href="https://github.com/Warwick-Allen/base60" target="_blank">github.com/Warwick-Allen/base60</a>
+  </p>
+</footer>
+
+
+<!-- ═══════════════════════ JAVASCRIPT ════════════════════════ -->
+<script>
+"use strict";
+
+/* ── Utilities ─────────────────────────────────────────────── */
+
+/** Convert a non-negative integer to English words. */
+function numToWords(n) {
+  if (n === 0) return 'zero';
+  const ones   = ['','one','two','three','four','five','six','seven','eight','nine'];
+  const teens  = ['ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const tensW  = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  const scales = ['','thousand','million','billion','trillion','quadrillion'];
+
+  function chunk(x) {
+    let w = '';
+    if (x >= 100) {
+      w += ones[Math.floor(x / 100)] + ' hundred';
+      x %= 100;
+      if (x) w += ' and ';
+    }
+    if (x >= 20) {
+      w += tensW[Math.floor(x / 10)];
+      x %= 10;
+      if (x) w += '-' + ones[x];
+    } else if (x >= 10) {
+      w += teens[x - 10];
+    } else if (x > 0) {
+      w += ones[x];
+    }
+    return w;
+  }
+
+  let parts = [], scale = 0;
+  while (n > 0) {
+    const c = n % 1000;
+    if (c) parts.unshift(chunk(c) + (scales[scale] ? ' ' + scales[scale] : ''));
+    n = Math.floor(n / 1000);
+    scale++;
+  }
+  return parts.join(', ');
+}
+
+function sep(x) { return Number(x).toLocaleString(); }
+
+/* ── API wrapper ───────────────────────────────────────────── */
+async function fetchLembrent(radix, number) {
+  try {
+    const resp = await fetch(`/lembrent/${radix}/${number}?name=1&svg=1&png=0`);
+    if (!resp.ok) return null;
+    return await resp.json();
+  } catch { return null; }
+}
+
+/** Build an inline glyph strip from an API result (or null). */
+function glyphStrip(data) {
+  if (!data || !data.svg || !data.svg.length) return '<span class="muted">—</span>';
+  const wrap = document.createElement('div');
+  wrap.className = 'glyph-strip';
+  data.svg.forEach(s => {
+    const span = document.createElement('span');
+    span.innerHTML = s;
+    wrap.appendChild(span);
+  });
+  return wrap.outerHTML;
+}
+
+/* ── Tab switching ─────────────────────────────────────────── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+    btn.closest('.calc-panel').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.closest('.calc-panel').querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + target).classList.add('active');
+    document.getElementById('calc-result').innerHTML = '';
+  });
+});
+
+/* ── Calculator: render result ─────────────────────────────── */
+async function renderCalcResult(value, expressionLabel) {
+  const container = document.getElementById('calc-result');
+  container.innerHTML = '<span class="spinner"></span> Fetching…';
+
+  const [d60, d64] = await Promise.all([fetchLembrent(60, value), fetchLembrent(64, value)]);
+
+  const name60 = d60?.name ?? '—';
+  const name64 = d64?.name ?? '—';
+
+  container.innerHTML = `
+    <div class="result-row">
+      <span class="result-label">Expression</span>
+      <span class="result-value">${expressionLabel} = <strong>${sep(value)}</strong></span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">In words</span>
+      <span class="result-value">${numToWords(value)}</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Lembrent-60 glyph</span>
+      <span class="result-value">${glyphStrip(d60)}</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Lembrent-60 name</span>
+      <span class="result-value"><code>${name60}</code></span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Lembrent-64 glyph</span>
+      <span class="result-value">${glyphStrip(d64)}</span>
+    </div>
+    <div class="result-row">
+      <span class="result-label">Lembrent-64 name</span>
+      <span class="result-value"><code>${name64}</code></span>
+    </div>`;
+}
+
+/* Expression calculator */
+document.getElementById('calc-eqn-btn').addEventListener('click', async () => {
+  const eqn = document.getElementById('eqn-input').value.trim();
+  let value;
+  try {
+    // eslint-disable-next-line no-new-func
+    value = Function('"use strict"; return (' + eqn + ')')();
+  } catch (err) {
+    document.getElementById('calc-result').innerHTML = `<span style="color:var(--accent);">Error: ${err.message}</span>`;
+    return;
+  }
+  if (!Number.isFinite(value) || value < 0) {
+    document.getElementById('calc-result').innerHTML = '<span class="muted">Please enter a non-negative integer or valid expression.</span>';
+    return;
+  }
+  await renderCalcResult(Math.floor(value), eqn);
+});
+
+/* Single number calculator */
+document.getElementById('calc-num-btn').addEventListener('click', async () => {
+  const raw = document.getElementById('num-input').value;
+  const value = parseInt(raw, 10);
+  if (isNaN(value) || value < 0) {
+    document.getElementById('calc-result').innerHTML = '<span class="muted">Please enter a non-negative integer.</span>';
+    return;
+  }
+  await renderCalcResult(value, sep(value));
+});
+
+/* Allow Enter key in inputs */
+document.getElementById('eqn-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('calc-eqn-btn').click();
+});
+document.getElementById('num-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('calc-num-btn').click();
+});
+
+/* ── Digit reference grid ──────────────────────────────────── */
+async function buildDigitGrid() {
+  const grid = document.getElementById('digit-ref-grid');
+  grid.innerHTML = '';
+
+  // Fetch all 64 glyphs via Promise.all (batching 60 + 4)
+  const [res60, res64] = await Promise.all([
+    Promise.all(Array.from({length: 60}, (_, i) => fetchLembrent(60, i))),
+    Promise.all(Array.from({length: 64}, (_, i) => fetchLembrent(64, i)))
+  ]);
+
+  for (let v = 0; v < 64; v++) {
+    const data = v < 60 ? res60[v] : res64[v];
+    const name = data?.name ?? '—';
+    // Strip length digit prefix — bare digit name is the first segment after prefix removal.
+    const bareName = digitNameFromAPI(name, v);
+
+    const card = document.createElement('div');
+    card.className = 'digit-card' + (v >= 60 ? ' b64-only' : '');
+    card.title = v >= 60 ? 'Lembrent-64 only' : '';
+
+    const svgEl = data?.svg?.[data.svg.length - 1] ?? '';
+
+    card.innerHTML = `
+      <span class="val">${v}${v >= 60 ? ' (base-64 only)' : ''}</span>
+      <span class="name">${bareName}</span>
+      <div class="glyph-wrap">${svgEl}</div>`;
+    grid.appendChild(card);
+  }
+}
+
+/** Extract the bare digit name from the API name string.
+ *  API returns e.g. "seet-eet" for the number 1 (base-60).
+ *  For digit reference, we show just the digit's own Lembrent name.
+ *  The digit name is the last hyphen-separated segment. */
+function digitNameFromAPI(name, value) {
+  if (!name || name === '—') return '—';
+  // Remove the base prefix (s… or k…) and split on hyphens.
+  const segs = name.replace(/^[sk]/, '').split('-').filter(Boolean);
+  // The last segment is the least-significant (units) digit,
+  // which for a single-digit number IS the digit itself.
+  return segs[segs.length - 1] ?? name;
+}
+
+buildDigitGrid();
+
+/* ── Samples table ─────────────────────────────────────────── */
+function buildSampleSet() {
+  const nums = new Set();
+  for (let i = 0; i < 64; i++) nums.add(i);
+
+  for (const radix of [60, 64]) {
+    for (let e = 1; e <= 5; e++) {
+      const p = Math.pow(radix, e);
+      for (let d = -2; d <= 2; d++) {
+        const n = Math.floor(Math.pow(p, Math.pow(1.004, d)));
+        if (n >= 0 && n < 1e9) nums.add(n);
       }
     }
-    loadSamples();
-  </script>
+  }
+
+  return [...nums].sort((a, b) => a - b).filter(n => n >= 0 && n < 1e9);
+}
+
+async function loadSamples() {
+  const tbody = document.getElementById('samples-tbody');
+  const nums = buildSampleSet().slice(0, 90);
+
+  // Fetch all in parallel
+  const [all60, all64] = await Promise.all([
+    Promise.all(nums.map(n => fetchLembrent(60, n))),
+    Promise.all(nums.map(n => fetchLembrent(64, n)))
+  ]);
+
+  tbody.innerHTML = '';
+  nums.forEach((n, i) => {
+    const d60 = all60[i];
+    const d64 = all64[i];
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td>${sep(n)}</td>
+      <td>${numToWords(n)}</td>
+      <td class="glyph-cell">${d60?.svg ? d60.svg.map(s => `<span style="display:inline-block;">${s}</span>`).join('') : '—'}</td>
+      <td><code>${d60?.name ?? '—'}</code></td>
+      <td class="glyph-cell">${d64?.svg ? d64.svg.map(s => `<span style="display:inline-block;">${s}</span>`).join('') : '—'}</td>
+      <td><code>${d64?.name ?? '—'}</code></td>`;
+    tbody.appendChild(row);
+  });
+}
+
+loadSamples();
+
+/* ── API live query ────────────────────────────────────────── */
+document.getElementById('api-query-btn').addEventListener('click', async () => {
+  const radix  = document.getElementById('api-radix').value;
+  const number = document.getElementById('api-number').value;
+  const pre    = document.getElementById('api-result');
+
+  pre.style.display = 'block';
+  pre.textContent = 'Loading…';
+
+  try {
+    const resp = await fetch(`/lembrent/${radix}/${number}?name=1&svg=1&png=0`);
+    const data = await resp.json();
+    // Pretty-print without SVG bodies (they are long)
+    const display = JSON.parse(JSON.stringify(data));
+    if (display.svg) display.svg = display.svg.map(() => '<SVG data omitted for brevity>');
+    pre.textContent = JSON.stringify(display, null, 2);
+  } catch (err) {
+    pre.textContent = 'Error: ' + err.message;
+  }
+});
+
+/* ── Samples scheme toggle ─────────────────────────────────── */
+document.querySelectorAll('.scheme-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.scheme-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const scheme = btn.dataset.scheme;
+    const table  = document.getElementById('samples-table');
+    // Columns: 1=decimal, 2=words, 3=60glyph, 4=60name, 5=64glyph, 6=64name
+    table.querySelectorAll('th, td').forEach(cell => {
+      const n = cell.cellIndex + 1;
+      if (scheme === '60') {
+        cell.style.display = (n === 5 || n === 6) ? 'none' : '';
+      } else if (scheme === '64') {
+        cell.style.display = (n === 3 || n === 4) ? 'none' : '';
+      } else {
+        cell.style.display = '';
+      }
+    });
+  });
+});
+</script>
+
 </body>
 </html>
