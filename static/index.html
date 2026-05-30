@@ -9,11 +9,21 @@
                         vertical-align: middle; }
     .number-entry     { font-size: 1.2em; margin: 0.6em 0; }
     .label            { font-weight: bold; }
-    .lembrent svg     { width: 6%; }
+    .lembrent svg     { width: 10%; }
+    .equation td:nth-child(1) { width:  8em; text-align:  left; }
+    .equation td:nth-child(2) { width: auto; text-align: right; }
+    .equation td:nth-child(3) { width: 32em; text-align:  left; }
+    .lembrent.equation svg    { max-height: 2ex; }
     table.samples     { border-collapse: collapse; margin-top: 1em; }
     table.samples td,
     table.samples th  { border: 1px solid #ddd; padding: 0.3em 0.6em;
                         text-align: right; }
+    .equation
+    table.samples td  { border: 0; }
+    .equation
+    table.samples tr  { border-top: 1px solid #ddd; }
+    .equation
+    table.samples tr:nth-child(1)  { border-top: 0; }
     .equation-row     { margin: 0.5em 0 1em 0; }
     .glyph-svg        { width: 2em; height: 2em; vertical-align: middle; }
   </style>
@@ -43,7 +53,7 @@
            autocomplete="off">
     <button type="submit">Calculate</button>
   </form>
-  <div class="lembrent" id="output"></div>
+  <div class="lembrent equation" id="output"></div>
 
   <hr>
 
@@ -123,6 +133,41 @@
       return data;
     }
 
+    // Tokenizes an equation string, preserving numbers, ops, and whitespace/punctuation
+    function tokenizeEquation(eqn) {
+      const re = /(\d+|\+|-|\*|\/|\^|\(|\))/g;
+      let res = [];
+      let lastIndex = 0;
+      let m;
+      while ((m = re.exec(eqn)) !== null) {
+        if (m.index > lastIndex) {
+          res.push({ type: 'raw', value: eqn.slice(lastIndex, m.index) });
+        }
+        const v = m[0];
+        if (/^\d+$/.test(v))
+          res.push({ type: 'number', value: v });
+        else
+          res.push({ type: 'op', value: v });
+        lastIndex = re.lastIndex;
+      }
+      if (lastIndex < eqn.length) {
+        res.push({ type: 'raw', value: eqn.slice(lastIndex) });
+      }
+      return res;
+    }
+
+    // For names/words, map operators to word equivalents
+    const OP_WORDS = {
+      '+': 'plus',
+      '-': 'minus',
+      '*': 'times',
+      '/': 'divided by',
+      '^': 'to the power of',
+      '(': 'open paren',
+      ')': 'close paren',
+      '=': 'equals'
+    };
+
     // === Handle equation form ===
     document.getElementById('equation-form').onsubmit = async function (e) {
       e.preventDefault();
@@ -137,20 +182,75 @@
       }
       value = Math.floor(value);
 
-      // Fetch Lembrent-60 and Lembrent-64 representations
-      const [l60, l64] = await Promise.all(
-        [lembrent(60, value), lembrent(64, value)]
-      );
+      // Tokenize equation
+      const tokens = tokenizeEquation(eqn);
+
+      // Unique numbers to process (all in equation, plus the answer)
+      let numbers = tokens.filter(t => t.type === 'number').map(t => t.value);
+      numbers.push(String(value));
+      numbers = Array.from(new Set(numbers));
+
+      // Fetch Lembrent representations for all numbers
+      let l60s = {}, l64s = {};
+      await Promise.all(numbers.map(async n => {
+        [l60s[n], l64s[n]] = await Promise.all([lembrent(60, n), lembrent(64, n)]);
+      }));
+
+      // Helper: convert tokens to pretty output (for different columns)
+      function tokensToString(tokens, forColumn) {
+        // forColumn: "decimal", "words", "l60glyph", "l60name", "l64glyph", "l64name"
+        return tokens.map(t => {
+          if (t.type === 'number') {
+            if (forColumn === "decimal") return sep(Number(t.value));
+            if (forColumn === "words") return numToWords(Number(t.value));
+            if (forColumn === "l60glyph") return l60s[t.value]?.svg?.join("") || "?";
+            if (forColumn === "l60name") return l60s[t.value]?.name || "?";
+            if (forColumn === "l64glyph") return l64s[t.value]?.svg?.join("") || "?";
+            if (forColumn === "l64name") return l64s[t.value]?.name || "?";
+          }
+          if (t.type === 'op') {
+            if (forColumn === "decimal" || forColumn === "l60glyph" || forColumn === "l64glyph") return t.value;
+            // otherwise (names/words)
+            return OP_WORDS[t.value] || t.value;
+          }
+          // treat whitespace/raw as-is
+          return t.value;
+        }).join('');
+      }
+
+      // Construct rows for the table
+      // Eq string: ... = <answer>
+
+      let decEq    = tokensToString(tokens, "decimal") + ' = ' + sep(value);
+      let decWords = tokensToString(tokens, "words")   + ' equals ' + numToWords(value);
+
+      let l60Glyph = tokensToString(tokens, "l60glyph") + ' = ' + (l60s[String(value)]?.svg?.join("") || "?");
+      let l60Name  = tokensToString(tokens, "l60name")  + ' equals ' + (l60s[String(value)]?.name || "?");
+
+      let l64Glyph = tokensToString(tokens, "l64glyph") + ' = ' + (l64s[String(value)]?.svg?.join("") || "?");
+      let l64Name  = tokensToString(tokens, "l64name")  + ' equals ' + (l64s[String(value)]?.name || "?");
+
+      // Put in output table
       document.getElementById('output').innerHTML =
-        `<div class="equation-row">
-          <b>Decimal:</b> <span>${sep(value)}</span><br>
-          <b>Lembrent-60:</b>
-          <span class="glyph">${l60?.svg?.join("")||"?"}</span>
-          <code>${l60?.name||"?"}</code><br>
-          <b>Lembrent-64:</b>
-          <span class="glyph">${l64?.svg?.join("")||"?"}</span>
-          <code>${l64?.name||"?"}</code>
-        </div>`;
+        `<table class="lembrent samples">
+          <tbody>
+          <tr>
+            <td><b>Decimal</b></td>
+            <td>${decEq}</td>
+            <td>${decWords}</td>
+          </tr>
+          <tr>
+            <td><b>Lembrent-60</b></td>
+            <td class="glyph">${l60Glyph}</td>
+            <td>${l60Name}</td>
+          </tr>
+          <tr>
+            <td><b>Lembrent-64</b></td>
+            <td class="glyph">${l64Glyph}</td>
+            <td>${l64Name}</code></td>
+          </tr>
+          </tbody>
+         </table>`;
     };
 
     // === Load sample numbers ===
