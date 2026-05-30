@@ -179,8 +179,11 @@
     .bitmap-table th, .bitmap-table td {
       border: 1px solid var(--rule);
       padding: .45rem .75rem;
-      text-align: center;
     }
+    .bitmap-table td:nth-child(1) { text-align: left; }
+    .bitmap-table td:nth-child(2) { text-align: center; }
+    .bitmap-table td:nth-child(3) { text-align: center; }
+    .bitmap-table td:nth-child(4) { text-align: left; }
     .bitmap-table thead th {
       background: var(--ink);
       color: var(--paper);
@@ -221,10 +224,16 @@
       font-weight: 500;
     }
     .template-box .slot .lbl {
-      font-size: .62rem;
-      letter-spacing: .06em;
-      text-transform: uppercase;
       color: #7a6d5a;
+      font-size: .62rem;
+      height: 1.2rem;
+      letter-spacing: .06em;
+      line-height: 0.9rem;
+      margin: -0.4rem 0.2rem 0.4rem;
+      text-transform: uppercase;
+    }
+    .template-box .slot.vow .lbl {
+      margin: 0;
     }
     .slot.con .char { color: var(--accent); }
     .slot.vow .char { color: var(--warm-mid); }
@@ -678,14 +687,14 @@
     </p>
 
     <div class="template-box">
-      <div class="slot opt con"><span class="char">l</span><span class="lbl">bit 5 (32)</span></div>
-      <div class="slot vow"><span class="char">e</span><span class="lbl">fixed</span></div>
-      <div class="slot opt con"><span class="char">m</span><span class="lbl">bit 4 (16)</span></div>
-      <div class="slot opt con"><span class="char">b</span><span class="lbl">bit 3 (8)</span></div>
-      <div class="slot opt con"><span class="char">r</span><span class="lbl">bit 2 (4)</span></div>
-      <div class="slot vow"><span class="char">e</span><span class="lbl">fixed</span></div>
-      <div class="slot opt con"><span class="char">n</span><span class="lbl">bit 1 (2)</span></div>
-      <div class="slot opt con"><span class="char">t</span><span class="lbl">bit 0 (1)</span></div>
+      <div class="slot opt con"><span class="char">l</span><span class="lbl">bit 5<br>(32)</span></div>
+      <div class="slot     vow"><span class="char">e</span><span class="lbl">fixed</span></div>
+      <div class="slot opt con"><span class="char">m</span><span class="lbl">bit 4<br>(16)</span></div>
+      <div class="slot opt con"><span class="char">b</span><span class="lbl">bit 3<br>(8)</span></div>
+      <div class="slot opt con"><span class="char">r</span><span class="lbl">bit 2<br>(4)</span></div>
+      <div class="slot     vow"><span class="char">e</span><span class="lbl">fixed</span></div>
+      <div class="slot opt con"><span class="char">n</span><span class="lbl">bit 1<br>(2)</span></div>
+      <div class="slot opt con"><span class="char">t</span><span class="lbl">bit 0<br>(1)</span></div>
     </div>
 
     <div class="callout">
