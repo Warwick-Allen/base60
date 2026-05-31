@@ -88,7 +88,11 @@ Placement tokens: `180+`, `180-`, `90+`, `90-`, `0+`, `0-`.
 ### Python API
 
 ```python
-from glyphs import Scheme, glyph_for_digit, plot_glyph
+from glyphs import (
+    Scheme,
+    glyph_for_digit,
+    plot_glyph,
+)
 
 glyph = glyph_for_digit(Scheme.S60, 12)
 plot_glyph(glyph)

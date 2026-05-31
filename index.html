@@ -1059,7 +1059,9 @@ curl -s "http://127.0.0.1:8000/lembrent/64/12?name=1&amp;svg=1&amp;png=1" | jq .
           integers to their Lembrent&#8209;60 or Lembrent&#8209;64 spoken names.
           It requires only Perl 5 — no non-core modules.
         </p>
-        <pre><code>git clone https://github.com/Warwick-Allen/base60.git
+        <pre><code>gh=https://github.com
+org=Warwick-Allen
+git clone $gh/$org/base60.git
 cd base60/lembrent
 chmod +x lembrent
 ./lembrent 60 70
@@ -1087,18 +1089,28 @@ source .venv/bin/activate
 pip install -e ".[dev]"</code></pre>
         <h4>CLI usage</h4>
         <pre><code><span style="color:var(--gold);"># SVG output (digit 12, scheme 60)</span>
-glyphs --scheme 60 --digit 12 --svg twelve.svg
+glyphs --scheme 60 --digit 12 \
+       --svg twelve.svg
 
 <span style="color:var(--gold);"># PNG output</span>
-glyphs --scheme 60 --digit 12 --png twelve.png
+glyphs --scheme 60 --digit 12 \
+       --png twelve.png
 
 <span style="color:var(--gold);"># Manual arm placement</span>
-glyphs --scheme 60 --placement 90+ --placement 90- --png m.png
+glyphs --scheme 60 \
+       --placement 90+ \
+       --placement 90- \
+       --png m.png
 
 <span style="color:var(--gold);"># Write SVG to stdout</span>
-glyphs --scheme 60 --digit 12 --svg -</code></pre>
+glyphs --scheme 60 --digit 12 \
+       --svg -</code></pre>
         <h4>Python API</h4>
-        <pre><code>from glyphs import Scheme, glyph_for_digit, plot_glyph
+        <pre><code>from glyphs import (
+    Scheme,
+    glyph_for_digit,
+    plot_glyph,
+)
 glyph = glyph_for_digit(Scheme.S60, 12)
 plot_glyph(glyph)</code></pre>
 

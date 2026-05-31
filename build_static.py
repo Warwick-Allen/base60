@@ -113,7 +113,11 @@ def generate_all_svgs() -> dict[str, dict[str, str]]:
     Returns  {"60": {"0": "<svg…>", …, "59": "…"}, "64": {"0": "…", …, "63": "…"}}
     """
     # Import here so the script fails clearly when the package is absent.
-    from glyphs import glyph_for_digit, glyph_to_svg, Scheme  # noqa: PLC0415
+    from glyphs import (                                      # noqa: PLC0415
+        glyph_for_digit,
+        glyph_to_svg,
+        Scheme,
+    )
 
     svgs: dict[str, dict[str, str]] = {"60": {}, "64": {}}
 
