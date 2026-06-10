@@ -180,10 +180,12 @@
       border: 1px solid var(--rule);
       padding: .45rem .75rem;
     }
-    .bitmap-table td:nth-child(1) { text-align: left; }
-    .bitmap-table td:nth-child(2) { text-align: center; }
+    .bitmap-table td:nth-child(1) { text-align: left  ; }
+    .bitmap-table td:nth-child(2) { text-align: right ; }
     .bitmap-table td:nth-child(3) { text-align: center; }
-    .bitmap-table td:nth-child(4) { text-align: left; }
+    .bitmap-table td:nth-child(4) { text-align: left  ; }
+    .bitmap-table td:nth-child(5) { text-align: center; }
+    .bitmap-table td:nth-child(6) { text-align: center; }
     .bitmap-table thead th {
       background: var(--ink);
       color: var(--paper);
@@ -807,19 +809,29 @@
         (0.5, 0).</p>
 
         <h3>Arm Bit Encoding</h3>
-        <table class="bitmap-table" style="margin-top:.5rem;">
-          <thead>
-            <tr><th>Bit</th><th>Sign</th><th>Rotation</th><th>Tip position</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>0 (LSB)</td><td>−</td><td>0</td><td>(0.5, 0) right</td></tr>
-            <tr><td>1</td><td>+</td><td>0</td><td>(0.5, 0)</td></tr>
-            <tr><td>2</td><td>−</td><td>π/2</td><td>(0, 0.5) above</td></tr>
-            <tr><td>3</td><td>+</td><td>π/2</td><td>(0, 0.5)</td></tr>
-            <tr><td>4</td><td>−</td><td>π</td><td>(−0.5, 0) left</td></tr>
-            <tr><td>5 (MSB)</td><td>+</td><td>π</td><td>(−0.5, 0)</td></tr>
-          </tbody>
-        </table>
+        <div style="overflow-x:auto;margin-top:.5rem;">
+          <table class="bitmap-table" style="min-width:48rem;">
+            <thead>
+              <tr>
+                <th> Bit                     </th>
+                <th> Decimal<br>value        </th>
+                <th> Angle                   </th>
+                <!-- th> Sign             </th -->
+                <th> Elbow<br>direction      </th>
+                <th> Tip<br>position         </th>
+                <th> ASCII<br>representation </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>2⁰ (LSB)</td><td class="bit-val"> 1</td><td>0</td  ><!-- td>−</td --><td>down</td        ><td>( 0.5, 0  )<br>right</td><td><code>.v</code   ></td></tr>
+              <tr><td>2¹</td      ><td class="bit-val"> 2</td><td>0</td  ><!-- td>+</td --><td>up</td          ><td>( 0.5, 0  )<br>right</td><td><code>.^</code   ></td></tr>
+              <tr><td>2²</td      ><td class="bit-val"> 4</td><td>π/2</td><!-- td>−</td --><td>right-facing</td><td>( 0  , 0.5)<br>top</td  ><td><code>.&gt;</code></td></tr>
+              <tr><td>2³</td      ><td class="bit-val"> 8</td><td>π/2</td><!-- td>+</td --><td>left-facing</td ><td>( 0  , 0.5)<br>top</td  ><td><code>&lt;.</code></td></tr>
+              <tr><td>2⁴</td      ><td class="bit-val">16</td><td>π</td  ><!-- td>−</td --><td>up</td          ><td>(−0.5, 0  )<br>left</td ><td><code>^.</code   ></td></tr>
+              <tr><td>2⁵ (MSB)</td><td class="bit-val">32</td><td>π</td  ><!-- td>+</td --><td>down</td        ><td>(−0.5, 0  )<br>left</td ><td><code>v.</code   ></td></tr>
+            </tbody>
+          </table>
+        </div>
         <p style="margin-top:.8rem;font-size:.85rem;" class="muted">
           Bit 0 is the rightmost arm stroke and bit 5 is the leftmost, so the
           glyph arm order aligns with the letter order in Lembrent names.
