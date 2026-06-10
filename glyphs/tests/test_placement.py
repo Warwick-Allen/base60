@@ -11,12 +11,12 @@ from glyphs.placement import ROTATION_BY_BIT, Placement
 @pytest.mark.parametrize(
     ("bit", "angle", "sign"),
     [
-        (0, np.pi,    1),
-        (1, np.pi,   -1),
-        (2, np.pi/2,  1),
-        (3, np.pi/2, -1),
-        (4, 0.0,      1),
-        (5, 0.0,     -1),
+        (0, 0.0,      -1),
+        (1, 0.0,       1),
+        (2, np.pi/2,  -1),
+        (3, np.pi/2,   1),
+        (4, np.pi,    -1),
+        (5, np.pi,     1),
     ],
 )
 def test_placement_from_bit(bit: int, angle: float, sign: int) -> None:

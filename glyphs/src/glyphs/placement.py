@@ -7,16 +7,16 @@ from enum import IntEnum
 import numpy as np
 
 ROTATION_BY_BIT: tuple[float, ...] = (
-    np.pi,
-    np.pi,
-    np.pi/2,
-    np.pi/2,
     0.0,
     0.0,
+    np.pi/2,
+    np.pi/2,
+    np.pi,
+    np.pi,
 )
 
 # CLI token for each bit index
-_TOKEN_BY_BIT: tuple[str, ...] = ("180+", "180-", "90+", "90-", "0+", "0-")
+_TOKEN_BY_BIT: tuple[str, ...] = ("0+", "0-", "90+", "90-", "180+", "180-")
 _BIT_BY_TOKEN: dict[str, int] = {token: i for i, token in enumerate(_TOKEN_BY_BIT)}
 
 
@@ -38,7 +38,7 @@ class Placement(IntEnum):
         return ROTATION_BY_BIT[self.bit_index]
 
     def sign(self) -> int:
-        return 1 if self.bit_index % 2 == 0 else -1
+        return -1 if self.bit_index % 2 == 0 else 1
 
     @classmethod
     def from_bit(cls, bit: int) -> Placement:

@@ -24,14 +24,17 @@ pip install -e ".[dev]"
 
 ## Bitmap encoding (arm bits)
 
-| Bit     | Sign | Rotation | Tip              |
-|---------|------|----------|------------------|
-| 0 (LSB) | `+`  | `π`      | `(-0.5, 0)` left |
-| 1       | `-`  | `π`      | `(-0.5, 0)`      |
-| 2       | `+`  | `π/2`    | `(0, 0.5)` above |
-| 3       | `-`  | `π/2`    | `(0, 0.5)`       |
-| 4       | `+`  | `0`      | `(0.5, 0)` right |
-| 5 (MSB) | `-`  | `0`      | `(0.5, 0)`       |
+| Bit     | Sign | Rotation | Tip               |
+|---------|------|----------|-------------------|
+| 0 (LSB) | `-`  | `0`      | `(0.5, 0)` right  |
+| 1       | `+`  | `0`      | `(0.5, 0)`        |
+| 2       | `-`  | `π/2`    | `(0, 0.5)` above  |
+| 3       | `+`  | `π/2`    | `(0, 0.5)`        |
+| 4       | `-`  | `π`      | `(-0.5, 0)` left  |
+| 5 (MSB) | `+`  | `π`      | `(-0.5, 0)`       |
+
+This mapping is such that the least-significant bits correspond to the rightmost
+glyph strokes, aligning glyph arm order with the letters in Lembrent names.
 
 Digit **12** = bits 2 and 3 set (`π/2` + and `π/2` −):
 
